@@ -2,5 +2,12 @@
 .venv
 .python-version
 
+# Python
+__pycache__
+
 # Testing
 tutorial
+
+# Static files
+*.json
+static

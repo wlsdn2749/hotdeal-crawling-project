@@ -6,8 +6,12 @@ class QuoteSpider(scrapy.Spider):
     name = "fm_hotdeal" # Spider 식별자, Unique 해야함
     
     def start_requests(self):
+        # urls = [
+        #     "https://www.fmkorea.com/hotdeal",
+        # ]
+        
         urls = [
-            "https://www.fmkorea.com/hotdeal",
+            f"https://www.fmkorea.com/index.php?mid=hotdeal&page={idx}" for idx in range(10)
         ]
         
         for url in urls:
