@@ -1,19 +1,11 @@
-import { useState } from 'react'
-import './App.css'
 
+import './App.css'
+import Home from './components/Home'
 function App() {
-  const [count, setCount] = useState(0)
 
   return (
     <>
-      리눅스만의 장점이라고 한다면?
-      ? 프론트에서는 뭐가 장점인데
-      뭐?
-      ?
-      ㅋㅋㅋㅋ
-      일단 깔았잖아 한잔해
-      그건 맞네
-
+      <Home />
     </>
   )
 }
