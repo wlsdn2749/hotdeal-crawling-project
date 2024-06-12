@@ -1,15 +1,18 @@
-import '../assets/HotDealItem.css'
-const HotDealItem = () => {
+// src/HotDealItem.jsx
+import React from 'react';
+import '../assets/HotDealItem.css';
+
+const HotDealItem = ({ item }) => {
     return (
         <div className="HotDealItem">
-            <div>쇼핑몰</div>
-            <div className='title'>제목</div>
+            <div>{item.shoppingmall}</div>
+            <div className='title'>{item.title}</div>
             <div className='price'>
-                <div>가격</div>
-                <div className='delivery'>배달비</div>
+                <div>{item.price}</div>
+                <div className='delivery'>{item.deliveryfee}</div>
             </div>
         </div>
-    )
-}
+    );
+};
 
 export default HotDealItem;

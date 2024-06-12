@@ -1,7 +1,36 @@
-import '../assets/List.css'
-import Item from './HotDealItem'
+import React, { useEffect, useState } from 'react';
+import { fetchItems } from '../api/test';
+import '../assets/List.css';
+import HotDealItem from './HotDealItem';
 
 const List = () => {
+    const [items, setItems] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        const getItems = async () => {
+            try {
+                const data = await fetchItems();
+                console.log('가져온 data', data);
+                setItems(data);
+                setLoading(false);
+            } catch (error) {
+                setError(error);
+                setLoading(false);
+            }
+        };
+
+        getItems();
+    }, []);
+
+    if (loading) {
+        return <div>Loading...</div>;
+    }
+
+    if (error) {
+        return <div>Error: {error.message}</div>;
+    }
 
     return (
         <div className="List">
@@ -24,13 +53,12 @@ const List = () => {
             </div>
 
             <div className="wrapper">
-                <Item />
-                <Item />
-                <Item />
-                <Item />
+                {items.map((item, index) => (
+                    <HotDealItem key={index} item={item} />
+                ))}
             </div>
         </div>
-    )
-}
+    );
+};
 
 export default List;
