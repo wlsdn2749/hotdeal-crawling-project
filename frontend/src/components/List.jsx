@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { fetchItems } from '../api/test';
+import { fetchItems } from '../api/Api';
 import '../assets/List.css';
 import HotDealItem from './HotDealItem';
 import ReactPaginate from 'react-paginate';
+import { useNavigate } from 'react-router-dom';
 
 const List = () => {
     const [items, setItems] = useState([]);
@@ -11,6 +12,7 @@ const List = () => {
     const [page, setPage] = useState(1);
     const [pageCount, setPageCount] = useState(0);
     const itemsPerPage = 10;
+    const navigate = useNavigate();
 
     useEffect(() => {
         const getItems = async () => {
@@ -32,10 +34,13 @@ const List = () => {
     }, [page, itemsPerPage]);
 
     const handlePageClick = (event) => {
-        const selectedPage = event.selected + 1; // 원하는 페이지의 1 낮은 값이므로 +1해줌
+        const selectedPage = event.selected + 1;
         setPage(selectedPage);
-        console.log('버튼을 눌렀을 때 event', selectedPage); // selectedPage로 변경
+        console.log('버튼을 눌렀을 때 event', selectedPage);
+    };
 
+    const handleItemClick = (item) => {
+        navigate(`/detail`, { state: { site: item.site, url: item.url } });
     };
 
     if (loading) {
@@ -94,7 +99,7 @@ const List = () => {
 
             <div className="wrapper">
                 {items.map((item, index) => (
-                    <HotDealItem key={index} item={item} />
+                    <HotDealItem key={index} item={item} onClick={() => handleItemClick(item)} />
                 ))}
             </div>
 
