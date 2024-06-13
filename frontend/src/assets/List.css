@@ -45,3 +45,32 @@
     white-space: nowrap;
     /* 텍스트가 줄 바꿈되지 않도록 설정 */
 }
+
+.pagination {
+    display: flex;
+    list-style: none;
+    padding: 0;
+    justify-content: center;
+}
+
+.page-item {
+    margin: 0 5px;
+}
+
+.page-link {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    text-decoration: none;
+    color: #007bff;
+}
+
+.page-link:hover {
+    background-color: #f2f2f2;
+}
+
+.active .page-link {
+    background-color: #d0d8df42;
+    border-color: #6586bd;
+    color: #1b4068;
+}
