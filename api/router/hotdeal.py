@@ -2,7 +2,7 @@ from fastapi import APIRouter
 from typing import Optional, List
 from api.database import db
 
-from api.model import Item
+from api.model import Item, HotdealItemDetail
 hotdeal = APIRouter(prefix='/hotdeal')
 
 
@@ -32,3 +32,33 @@ async def read_items(page: int = 0, count: int = 20):
     
     items: List[Item] = [Item(**dict(zip(columns,item))) for item in result]
     return items
+
+@hotdeal.get('/detail', tags=['hotdeal'], response_model = HotdealItemDetail)
+async def read_item_detail(site: str = "fm", url: str = "https://www.fmkorea.com/7138477950"):
+    '''
+        site와 url을 통해 item을 읽어옴
+        
+        type:
+            site: default = fm
+            url: default = 벨킨..?
+            
+        rtype:
+            HotdealItemDetail
+        
+    '''
+    
+    conn = db.get_connection()
+    
+    colmuns = list(HotdealItemDetail.model_fields)
+    
+    query = f"""
+        SELECT *
+        FROM {site}_detail
+        WHERE url = '{url}'
+    """
+    
+    result = conn.execute(query).fetchone()
+    
+    detail: HotdealItemDetail = dict(zip(colmuns, result))
+    return detail
+    

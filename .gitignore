@@ -10,4 +10,4 @@ tutorial
 
 # Static files
 *.json
-static
+# static
