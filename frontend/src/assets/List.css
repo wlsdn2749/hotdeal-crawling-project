@@ -1,0 +1,76 @@
+.List {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.List .search-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    /* 필요한 경우 요소 간의 간격을 조정 */
+}
+
+.List>input {
+    width: 100%;
+    border: none;
+    border-bottom: 1px solid rgb(220, 220, 220);
+    padding: 15px 0px;
+}
+
+.List>input:focus {
+    outline: none;
+    border-bottom: 1px solid;
+}
+
+.List .wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.List .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 12px;
+    /* 버튼 패딩 설정 */
+    height: 38px;
+    /* 버튼 높이 설정 */
+    font-size: 16px;
+    /* 텍스트 크기 설정 */
+    width: auto;
+    /* 버튼 너비를 자동으로 설정 */
+    white-space: nowrap;
+    /* 텍스트가 줄 바꿈되지 않도록 설정 */
+}
+
+.pagination {
+    display: flex;
+    list-style: none;
+    padding: 0;
+    justify-content: center;
+}
+
+.page-item {
+    margin: 0 5px;
+}
+
+.page-link {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    text-decoration: none;
+    color: #007bff;
+}
+
+.page-link:hover {
+    background-color: #f2f2f2;
+}
+
+.active .page-link {
+    background-color: #d0d8df42;
+    border-color: #6586bd;
+    color: #1b4068;
+}
