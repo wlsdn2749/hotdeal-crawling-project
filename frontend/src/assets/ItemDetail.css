@@ -1,0 +1,20 @@
+/* src/assets/ItemDetail.css */
+
+.ItemDetail {
+    padding: 20px;
+    background-color: #f9f9f9;
+}
+
+.ItemDetail h1 {
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+
+.ItemDetail p {
+    margin: 5px 0;
+}
+
+.ItemDetail a {
+    color: blue;
+    text-decoration: underline;
+}
