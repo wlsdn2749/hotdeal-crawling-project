@@ -1,23 +1,44 @@
-from fastapi import APIRouter
-from typing import Optional, List
+from fastapi import APIRouter, Depends, Query, HTTPException
+from typing import Optional, List, Annotated
+from pydantic import Field, field_validator, BaseModel
 from api.database import db
+from api.utils import load_valid_categories
 
 from api.model import Item, HotdealItemDetail
 hotdeal = APIRouter(prefix='/hotdeal')
 
+VALID_CATEGORIES = load_valid_categories("./api/static/categories_fm.txt")
 
-# @hotdeal.get('/', tags=['hotdeal'])
-# async def start_hotdeal():
-#     '''
-#         핫딜 메인페이지
-#     '''
-#     return {'msg' : 'Here is Hotdeal'}
-
-@hotdeal.get('/', tags=['hotdeal'], response_model=List[Item])
-async def read_items(page: int = 0, count: int = 20):
+class ItemList(BaseModel):
     '''
         각 page는 count만큼의 Item을 보여줌
+        categories 필터를 추가함, 기본값은 모든 카테고리
     '''
+    page: int = Field(Query(0, description='Page number'))
+    count: int = Field(Query(20, description='Number of items per page'))
+    categories: List[str] = Field(Query([], description='List of categories'))
+    
+    @field_validator('categories')
+    def check_categories(cls, v):
+        if not v:
+            return None
+        
+        invalid_categories = [category for category in v if category not in VALID_CATEGORIES]
+        if invalid_categories:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Invalid categories: {', '.join(invalid_categories)}. Valid categories are: {', '.join(VALID_CATEGORIES)}"
+            )
+            
+        return v
+    
+@hotdeal.get('/', tags=['hotdeal'], response_model=List[Item])
+async def read_items(itemlist: ItemList = Depends()):
+    
+    categories = itemlist.categories
+    page = itemlist.page
+    count = itemlist.count
+    
     
     conn = db.get_connection()
     columns = list(Item.model_fields)
@@ -25,10 +46,22 @@ async def read_items(page: int = 0, count: int = 20):
     query = f"""
         SELECT *
         FROM fm
-        OFFSET {page*count}
-        LIMIT {count}
-    """ 
-    result = conn.execute(query).fetchall()
+    """
+    
+    # Validate categories if provide
+
+    if categories:     
+        categories_placeholder = ', '.join('?' * len(categories))
+        query += f" WHERE category IN ({categories_placeholder})"
+
+        
+    query += f"OFFSET {page*count} LIMIT {count}"
+    
+    print(query)
+    if categories:
+        result = conn.execute(query, categories).fetchall()
+    else:
+        result = conn.execute(query).fetchall()
     
     items: List[Item] = [Item(**dict(zip(columns,item))) for item in result]
     return items
@@ -62,3 +95,4 @@ async def read_item_detail(site: str = "fm", url: str = "https://www.fmkorea.com
     detail: HotdealItemDetail = dict(zip(colmuns, result))
     return detail
     
+# @hotdeal.get('/')
