@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, Query, HTTPException
-from typing import Optional, List, Annotated
-from pydantic import Field, field_validator, BaseModel
+from typing import Optional, List, Annotated, Literal
+from pydantic import Field, field_validator, BaseModel, ValidationInfo
 from api.database import db
 from api.utils import load_valid_categories
 
@@ -17,19 +17,30 @@ class ItemList(BaseModel):
     page: int = Field(Query(0, description='Page number'))
     count: int = Field(Query(20, description='Number of items per page'))
     categories: List[str] = Field(Query([], description='List of categories'))
+    order: str = Field(Query('desc', description='time order of items'))
     
-    @field_validator('categories')
-    def check_categories(cls, v):
-        if not v:
-            return None
+    @field_validator('categories', 'order')
+    @classmethod
+    def check_attrs(cls, v, info: ValidationInfo):
         
-        invalid_categories = [category for category in v if category not in VALID_CATEGORIES]
-        if invalid_categories:
-            raise HTTPException(
-                status_code=400,
-                detail=f"Invalid categories: {', '.join(invalid_categories)}. Valid categories are: {', '.join(VALID_CATEGORIES)}"
-            )
+        if info.field_name == 'categories':
+            if not v:
+                return None
             
+            invalid_categories = [category for category in v if category not in VALID_CATEGORIES]
+            if invalid_categories:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Invalid categories: {', '.join(invalid_categories)}. Valid categories are: {', '.join(VALID_CATEGORIES)}"
+                )
+                
+        if info.field_name == 'order':
+            if v not in ['asc', 'desc']:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Time order must be eiter 'asc' or 'desc'"
+                )
+                
         return v
     
 @hotdeal.get('/', tags=['hotdeal'], response_model=List[Item])
@@ -38,6 +49,7 @@ async def read_items(itemlist: ItemList = Depends()):
     categories = itemlist.categories
     page = itemlist.page
     count = itemlist.count
+    order = itemlist.order
     
     
     conn = db.get_connection()
@@ -55,7 +67,7 @@ async def read_items(itemlist: ItemList = Depends()):
         query += f" WHERE category IN ({categories_placeholder})"
 
         
-    query += f"OFFSET {page*count} LIMIT {count}"
+    query += f"ORDER BY time {order} OFFSET {page*count} LIMIT {count}"
     
     print(query)
     if categories:

@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from typing import Optional
-
+from datetime import datetime
 
 class Item(BaseModel):
     site: str
@@ -12,7 +12,7 @@ class Item(BaseModel):
     price: str
     deliveryfee: str
     category: str
-    time: str
+    time: datetime
     author: str
     
 class HotdealItemDetail(BaseModel):

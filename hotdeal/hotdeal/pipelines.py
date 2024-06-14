@@ -6,7 +6,7 @@
 
 # useful for handling different item types with a single interface
 from itemadapter import ItemAdapter
-
+from hotdeal.utils import convert_to_datetime
 import re
 
 class HotdealPipeline:
@@ -33,8 +33,15 @@ class HotdealPipeline:
         
         item['title'] = item['title'].strip()
 
-        # time 필드 처리
-        item['time'] = item['time'].strip()
+        """
+            Time Field Process
+            
+            Input 1 = HH:MM
+            Input 2 = YYYY.MM.DD
+            
+            Output -> YYYY-MM-DD HH:MM
+        """
+        item['time'] = convert_to_datetime(item['time'].strip())
 
         # author 필드 처리
         item['author'] = re.sub(r'[\s/]', '', item['author'])

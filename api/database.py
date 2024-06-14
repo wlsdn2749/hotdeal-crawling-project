@@ -12,7 +12,12 @@ class DuckDBManager():
     
     def update_table(self) -> None:
         # todo if exist, drop table
-        self.conn.execute("CREATE TABLE fm AS SELECT * FROM read_csv_auto('./api/static/hotdeal_fm.csv')")
+        self.conn.execute("""
+                          CREATE TABLE fm AS 
+                          SELECT * 
+                          FROM 
+                          read_csv('./api/static/hotdeal_fm.csv', timestampformat = '%Y-%M-%d %H:%M')
+                          """)
         self.conn.execute("CREATE TABLE fm_detail AS SELECT * FROM read_csv_auto('./api/static/hotdeal_fm_board.csv')")
     
 db = DuckDBManager()
