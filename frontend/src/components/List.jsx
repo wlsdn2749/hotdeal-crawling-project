@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Select from 'react-select';
 import { fetchItems, fetchItemsByCategories } from '../api/Api';
-import '../assets/List.css'; 
+import '../assets/List.css';
 import HotDealItem from './HotDealItem';
 import ReactPaginate from 'react-paginate';
 import { useNavigate } from 'react-router-dom';
@@ -59,41 +59,8 @@ const List = () => {
 
     const handleCategoryChange = (selected) => {
         setSelectedCategories(selected);
+        setPage(1); // 카테고리가 변경될 때 페이지를 1로 초기화
     };
-
-    if (loading) {
-        return (
-            <div>
-                Loading...
-                <ReactPaginate
-                    previousLabel={'«'}
-                    nextLabel={'»'}
-                    breakLabel={'...'}
-                    breakClassName={'break-me'}
-                    pageCount={pageCount}
-                    marginPagesDisplayed={2}
-                    pageRangeDisplayed={5}
-                    onPageChange={handlePageClick}
-                    containerClassName={'pagination'}
-                    subContainerClassName={'pages pagination'}
-                    activeClassName={'active'}
-                    previousClassName={'page-item'}
-                    nextClassName={'page-item'}
-                    pageClassName={'page-item'}
-                    previousLinkClassName={'page-link'}
-                    nextLinkClassName={'page-link'}
-                    pageLinkClassName={'page-link'}
-                    breakLinkClassName={'page-link'}
-                    activeLinkClassName={'active'}
-                    disabledClassName={'disabled'}
-                />
-            </div>
-        );
-    }
-
-    if (error) {
-        return <div>Error: {error.message}</div>;
-    }
 
     return (
         <div className="List">
@@ -115,11 +82,17 @@ const List = () => {
                 </form>
             </div>
 
-            <div className="wrapper">
-                {items.map((item, index) => (
-                    <HotDealItem key={index} item={item} onClick={() => handleItemClick(item)} />
-                ))}
-            </div>
+            {loading ? (
+                <div>Loading...</div>
+            ) : error ? (
+                <div>Error: {error.message}</div>
+            ) : (
+                <div className="wrapper">
+                    {items.map((item, index) => (
+                        <HotDealItem key={index} item={item} onClick={() => handleItemClick(item)} />
+                    ))}
+                </div>
+            )}
 
             <ReactPaginate
                 previousLabel={'«'}
@@ -142,6 +115,7 @@ const List = () => {
                 breakLinkClassName={'page-link'}
                 activeLinkClassName={'active'}
                 disabledClassName={'disabled'}
+                forcePage={page - 1} // 현재 페이지를 반영하기 위해 forcePage 사용
             />
         </div>
     );
