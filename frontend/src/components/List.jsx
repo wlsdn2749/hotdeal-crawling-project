@@ -1,9 +1,25 @@
 import React, { useEffect, useState } from 'react';
-import { fetchItems } from '../api/Api';
-import '../assets/List.css';
+import Select from 'react-select';
+import { fetchItems, fetchItemsByCategories } from '../api/Api';
+import '../assets/List.css'; 
 import HotDealItem from './HotDealItem';
 import ReactPaginate from 'react-paginate';
 import { useNavigate } from 'react-router-dom';
+
+const categoryOptions = [
+    { value: '먹거리', label: '먹거리' },
+    { value: 'SW/게임', label: 'SW/게임' },
+    { value: 'PC제품', label: 'PC제품' },
+    { value: '가전제품', label: '가전제품' },
+    { value: '생활용품', label: '생활용품' },
+    { value: '의류', label: '의류' },
+    { value: '세일정보', label: '세일정보' },
+    { value: '화장품', label: '화장품' },
+    { value: '모바일/상품권', label: '모바일/상품권' },
+    { value: '패키지/이용권', label: '패키지/이용권' },
+    { value: '기타', label: '기타' },
+    { value: '해외핫딜', label: '해외핫딜' }
+];
 
 const List = () => {
     const [items, setItems] = useState([]);
@@ -11,6 +27,7 @@ const List = () => {
     const [error, setError] = useState(null);
     const [page, setPage] = useState(1);
     const [pageCount, setPageCount] = useState(0);
+    const [selectedCategories, setSelectedCategories] = useState([]);
     const itemsPerPage = 10;
     const navigate = useNavigate();
 
@@ -18,9 +35,7 @@ const List = () => {
         const getItems = async () => {
             setLoading(true);
             try {
-                console.log('서버로 보내는 page 번호', page);
-                const { items, total } = await fetchItems(page, itemsPerPage);
-                console.log('가져온 data', items);
+                const { items, total } = await fetchItemsByCategories(page, itemsPerPage, selectedCategories.map(c => c.value));
                 setItems(Array.isArray(items) ? items : []);
                 setPageCount(Math.ceil(total / itemsPerPage));
                 setLoading(false);
@@ -31,16 +46,19 @@ const List = () => {
         };
 
         getItems();
-    }, [page, itemsPerPage]);
+    }, [page, itemsPerPage, selectedCategories]);
 
     const handlePageClick = (event) => {
         const selectedPage = event.selected + 1;
         setPage(selectedPage);
-        console.log('버튼을 눌렀을 때 event', selectedPage);
     };
 
     const handleItemClick = (item) => {
         navigate(`/detail`, { state: { site: item.site, url: item.url } });
+    };
+
+    const handleCategoryChange = (selected) => {
+        setSelectedCategories(selected);
     };
 
     if (loading) {
@@ -81,14 +99,14 @@ const List = () => {
         <div className="List">
             <div className="search-container">
                 <div className="dropdown">
-                    <button className="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
-                        카테고리
-                    </button>
-                    <ul className="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-                        <li><a className="dropdown-item" href="#">Action</a></li>
-                        <li><a className="dropdown-item" href="#">Another action</a></li>
-                        <li><a className="dropdown-item" href="#">Something else here</a></li>
-                    </ul>
+                    <Select
+                        isMulti
+                        options={categoryOptions}
+                        value={selectedCategories}
+                        onChange={handleCategoryChange}
+                        placeholder="카테고리를 선택하세요"
+                        closeMenuOnSelect={false}
+                    />
                 </div>
 
                 <form className="d-flex">
