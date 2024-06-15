@@ -22,7 +22,7 @@ export const fetchItems = async (page = 1, limit = 10) => {
 //사이트(크롤링한 사이트)랑 URL(게시글의 원래 URL)를 파라미터로?
 export const detailItem = async (site, url) => {
     try {
-        const response = await axios.get(API_URL, {
+        const response = await axios.get(`${API_URL}/detail`, {
             params: { site: site, url: url }
         });
         return {
