@@ -21,6 +21,11 @@ const categoryOptions = [
     { value: '해외핫딜', label: '해외핫딜' }
 ];
 
+const orderOptions = [
+    { value: 'desc', label: '최신순' },
+    { value: 'asc', label: '오래된 순' }
+];
+
 const List = () => {
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -28,6 +33,7 @@ const List = () => {
     const [page, setPage] = useState(1);
     const [pageCount, setPageCount] = useState(0);
     const [selectedCategories, setSelectedCategories] = useState([]);
+    const [order, setOrder] = useState(orderOptions[0]); // 기본 정렬을 최신순으로 설정
     const itemsPerPage = 10;
     const navigate = useNavigate();
 
@@ -35,7 +41,8 @@ const List = () => {
         const getItems = async () => {
             setLoading(true);
             try {
-                const { items, total } = await fetchItemsByCategories(page, itemsPerPage, selectedCategories.map(c => c.value));
+                const { items, total } = await fetchItemsByCategories(page, itemsPerPage, selectedCategories.map(c => c.value), order.value);
+                console.log('서버에서 받아온 items', items);
                 setItems(Array.isArray(items) ? items : []);
                 setPageCount(Math.ceil(total / itemsPerPage));
                 setLoading(false);
@@ -46,7 +53,7 @@ const List = () => {
         };
 
         getItems();
-    }, [page, itemsPerPage, selectedCategories]);
+    }, [page, itemsPerPage, selectedCategories, order]);
 
     const handlePageClick = (event) => {
         const selectedPage = event.selected + 1;
@@ -62,10 +69,15 @@ const List = () => {
         setPage(1); // 카테고리가 변경될 때 페이지를 1로 초기화
     };
 
+    const handleOrderChange = (selected) => {
+        setOrder(selected);
+        setPage(1); // 정렬 방식이 변경될 때 페이지를 1로 초기화
+    };
+
     return (
         <div className="List">
             <div className="search-container">
-                <div className="dropdown">
+                <div className="dropdown-container">
                     <Select
                         isMulti
                         options={categoryOptions}
@@ -73,6 +85,14 @@ const List = () => {
                         onChange={handleCategoryChange}
                         placeholder="카테고리를 선택하세요"
                         closeMenuOnSelect={false}
+                    />
+                    <Select
+                        options={orderOptions}
+                        value={order}
+                        onChange={handleOrderChange}
+                        placeholder="정렬 방식 선택"
+                        closeMenuOnSelect={true}
+                        className="order-dropdown" // 새로운 CSS 클래스를 추가합니다
                     />
                 </div>
 
@@ -104,7 +124,7 @@ const List = () => {
                 pageRangeDisplayed={5}
                 onPageChange={handlePageClick}
                 containerClassName={'pagination'}
-                subContainerClassName={'pages pagination'}
+                subContainerClassName={'pages pagination'}  
                 activeClassName={'active'}
                 previousClassName={'page-item'}
                 nextClassName={'page-item'}
