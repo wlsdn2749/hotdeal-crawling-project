@@ -1,9 +1,11 @@
+import pickle
+import base64
+
 from fastapi import APIRouter, Depends, Query, HTTPException
 from typing import Optional, List, Annotated, Literal
 from pydantic import Field, field_validator, BaseModel, ValidationInfo
 from api.database import db
 from api.utils import load_valid_categories
-
 from api.model import Item, HotdealItemDetail
 hotdeal = APIRouter(prefix='/hotdeal')
 
@@ -14,7 +16,7 @@ class ItemList(BaseModel):
         각 page는 count만큼의 Item을 보여줌
         categories 필터를 추가함, 기본값은 모든 카테고리
     '''
-    page: int = Field(Query(0, description='Page number'))
+    page: int = Field(Query(1, ge=1, description='Page number'))
     count: int = Field(Query(20, description='Number of items per page'))
     categories: List[str] = Field(Query([], description='List of categories'))
     order: str = Field(Query('desc', description='time order of items'))
@@ -67,7 +69,7 @@ async def read_items(itemlist: ItemList = Depends()):
         query += f" WHERE category IN ({categories_placeholder})"
 
         
-    query += f"ORDER BY time {order} OFFSET {page*count} LIMIT {count}"
+    query += f"ORDER BY time {order} OFFSET {(page-1)*count} LIMIT {count}"
     
     print(query)
     if categories:
@@ -105,6 +107,7 @@ async def read_item_detail(site: str = "fm", url: str = "https://www.fmkorea.com
     result = conn.execute(query).fetchone()
     
     detail: HotdealItemDetail = dict(zip(colmuns, result))
+    detail["comments"] = pickle.loads(base64.b64decode(detail["comments"].encode('utf-8')))
     return detail
     
 # @hotdeal.get('/')
