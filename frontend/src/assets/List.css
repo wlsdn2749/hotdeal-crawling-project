@@ -74,3 +74,12 @@
     border-color: #6586bd;
     color: #1b4068;
 }
+
+.dropdown-container {
+    display: flex;
+    align-items: center;
+}
+
+.order-dropdown {
+    margin-left: 10px;
+}

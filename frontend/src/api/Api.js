@@ -1,12 +1,12 @@
 import axios from 'axios';
-import qs from 'qs';  // qs 라이브러리 임포트
+import qs from 'qs';  // qs 라이브러리 사용
 
 const API_URL = 'http://tools.gyu.be:8000/hotdeal';
 
-export const fetchItems = async (page = 1, limit = 10) => {
+export const fetchItems = async (page = 1, limit = 10, order = 'desc') => {
     try {
         const response = await axios.get(API_URL, {
-            params: { page, count: limit }
+            params: { page, count: limit, order }
         });
         return {
             items: response.data,
@@ -34,11 +34,11 @@ export const detailItem = async (site, url) => {
     }
 };
 
-// 카테고리로 필터링된 아이템을 가져오는 함수 추가
-export const fetchItemsByCategories = async (page = 1, limit = 10, categories = []) => {
+// 카테고리 및 정렬 방식으로 필터링된 아이템을 가져오는 함수 추가
+export const fetchItemsByCategories = async (page = 1, limit = 10, categories = [], order = 'desc') => {
     console.log('넘겨받은 카테고리', categories); // 정상
     if (categories.length === 0) {
-        return await fetchItems(page, limit);
+        return await fetchItems(page, limit, order);
     }
 
     try {
@@ -46,7 +46,8 @@ export const fetchItemsByCategories = async (page = 1, limit = 10, categories = 
             params: {
                 page,
                 count: limit,
-                categories
+                categories,
+                order
             },
             paramsSerializer: params => qs.stringify(params, { arrayFormat: 'repeat' })  // qs 사용
         });
