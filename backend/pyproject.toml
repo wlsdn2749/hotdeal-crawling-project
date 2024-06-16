@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "hotdeal-crawling-project"
+version = "0.1.0"
+description = ""
+authors = ["Serotina <wlsdn2749@gmail.com>"]
+readme = "README.md"
+package-mode = false
+
+[tool.poetry.dependencies]
+python = "^3.12"
+scrapy = "^2.11.2"
+duckdb = "^1.0.0"
+fastapi = "^0.111.0"
+uvicorn = {extras = ["standard"], version = "^0.30.1"}
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
