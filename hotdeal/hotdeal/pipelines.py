@@ -6,8 +6,11 @@
 
 # useful for handling different item types with a single interface
 from itemadapter import ItemAdapter
-from hotdeal.utils import convert_to_datetime
+from hotdeal.utils import convert_to_datetime, convert_to_datetime_detail
+import pickle
 import re
+import base64
+
 
 class HotdealPipeline:
     def open_spider(self, spider):
@@ -57,7 +60,16 @@ class HotdealDetailPipeline:
         
         item['shoppingmall'] = item['shoppingmall'].strip()
         
+        # article이 아예 없는 경우
         if item['article'] is None:
             item['article'] = ""
+        
+        for comments in item['comments']:
+            comments['author'] = comments['author'].strip()
+            comments['content'] = [content.strip() for content in comments['content']]
+            comments['date'] = convert_to_datetime_detail(comments['date'].replace(" ", "")) 
+            
+        item['comments'] = base64.b64encode(pickle.dumps(item['comments'])).decode('utf-8') # pickle로 comment data 직렬화 -> base64 encoding
+        
             
         return item

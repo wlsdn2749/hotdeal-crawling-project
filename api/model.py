@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List, Dict, Union
 from datetime import datetime
 
 class Item(BaseModel):
@@ -30,4 +30,4 @@ class HotdealItemDetail(BaseModel):
     price: str
     deliveryfee: str
     article: Optional[str] = None
-    comments: str
+    comments: List[Dict[str, Union[str, int, List]]] = None

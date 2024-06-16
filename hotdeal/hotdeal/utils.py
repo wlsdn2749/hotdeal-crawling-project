@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
 def convert_to_datetime(input_str):
     try:
@@ -21,3 +21,17 @@ def convert_to_datetime(input_str):
     output_str = datetime_combined.strftime('%Y-%m-%d %H:%M')
 
     return output_str
+
+def convert_to_datetime_detail(time_str: str) -> str:
+    now = datetime.now()
+    if "분전" in time_str:
+        minutes = int(time_str.replace("분전", "").strip())
+        result_time = now - timedelta(minutes=minutes)
+    elif "시간전" in time_str:
+        hours = int(time_str.replace("시간전", "").strip())
+        result_time = now - timedelta(hours=hours)
+        
+    else:
+        return time_str
+    
+    return result_time.strftime("%Y-%m-%d %H:%M")
