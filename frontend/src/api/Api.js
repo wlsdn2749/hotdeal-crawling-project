@@ -36,7 +36,6 @@ export const detailItem = async (site, url) => {
 
 // 카테고리 및 정렬 방식으로 필터링된 아이템을 가져오는 함수 추가
 export const fetchItemsByCategories = async (page = 1, limit = 10, categories = [], order = 'desc') => {
-    console.log('넘겨받은 카테고리', categories); // 정상
     if (categories.length === 0) {
         return await fetchItems(page, limit, order);
     }
@@ -57,6 +56,28 @@ export const fetchItemsByCategories = async (page = 1, limit = 10, categories = 
         };
     } catch (error) {
         console.error('Error fetching items by categories:', error);
+        throw error;
+    }
+};
+
+// 검색어로 필터링된 아이템을 가져오는 함수 추가
+export const searchItems = async (page = 1, limit = 10, searchQuery = '', searchMode = 'title', order = 'desc') => {
+    try {
+        const response = await axios.get(API_URL, {
+            params: {
+                page,
+                count: limit,
+                search_mode: searchMode,
+                search_query: searchQuery,
+                order
+            }
+        });
+        return {
+            items: response.data,
+            total: 200, // 총 아이템 수를 임의로 200으로 설정
+        };
+    } catch (error) {
+        console.error('Error searching items:', error);
         throw error;
     }
 };

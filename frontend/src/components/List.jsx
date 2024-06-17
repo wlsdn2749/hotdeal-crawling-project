@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Select from 'react-select';
-import { fetchItems, fetchItemsByCategories } from '../api/Api';
+import { fetchItems, fetchItemsByCategories, searchItems } from '../api/Api';
 import '../assets/List.css';
 import HotDealItem from './HotDealItem';
 import ReactPaginate from 'react-paginate';
@@ -26,6 +26,11 @@ const orderOptions = [
     { value: 'asc', label: '오래된 순' }
 ];
 
+const searchModeOptions = [
+    { value: 'title', label: '제목' },
+    { value: 'title_content', label: '제목+내용' }
+];
+
 const List = () => {
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -34,6 +39,8 @@ const List = () => {
     const [pageCount, setPageCount] = useState(0);
     const [selectedCategories, setSelectedCategories] = useState([]);
     const [order, setOrder] = useState(orderOptions[0]); // 기본 정렬을 최신순으로 설정
+    const [searchQuery, setSearchQuery] = useState(''); // 검색어 상태 변수
+    const [searchMode, setSearchMode] = useState(searchModeOptions[0]); // 검색 모드 상태 변수
     const itemsPerPage = 10;
     const navigate = useNavigate();
 
@@ -41,7 +48,8 @@ const List = () => {
         const getItems = async () => {
             setLoading(true);
             try {
-                const { items, total } = await fetchItemsByCategories(page, itemsPerPage, selectedCategories.map(c => c.value), order.value);
+                const result = await fetchItemsByCategories(page, itemsPerPage, selectedCategories.map(c => c.value), order.value);
+                const { items, total } = result;
                 console.log('서버에서 받아온 items', items);
                 setItems(Array.isArray(items) ? items : []);
                 setPageCount(Math.ceil(total / itemsPerPage));
@@ -74,6 +82,31 @@ const List = () => {
         setPage(1); // 정렬 방식이 변경될 때 페이지를 1로 초기화
     };
 
+    const handleSearchModeChange = (selected) => {
+        setSearchMode(selected); // 검색 모드 변경 시 상태 업데이트
+    };
+
+    const handleSearchChange = (event) => {
+        setSearchQuery(event.target.value); // 검색어 입력 시 상태 업데이트
+    };
+
+    const handleSearchSubmit = async (event) => {
+        event.preventDefault();
+        setLoading(true);
+        try {
+            const result = await searchItems(1, itemsPerPage, searchQuery, searchMode.value, order.value);
+            const { items, total } = result;
+            console.log('서버에서 받아온 items', items);
+            setItems(Array.isArray(items) ? items : []);
+            setPageCount(Math.ceil(total / itemsPerPage));
+            setPage(1); // 검색할 때 페이지를 1로 초기화
+            setLoading(false);
+        } catch (error) {
+            setError(error);
+            setLoading(false);
+        }
+    };
+
     return (
         <div className="List">
             <div className="search-container">
@@ -92,13 +125,21 @@ const List = () => {
                         onChange={handleOrderChange}
                         placeholder="정렬 방식 선택"
                         closeMenuOnSelect={true}
-                        className="order-dropdown" // 새로운 CSS 클래스를 추가합니다
+                        className="order-dropdown"
                     />
                 </div>
 
-                <form className="d-flex">
-                    <input className="form-control me-2" type="search" placeholder="Search" aria-label="Search" />
-                    <button className="btn btn-outline-success" type="submit">검색</button>
+                <form className="d-flex" onSubmit={handleSearchSubmit}>
+                    <Select
+                        options={searchModeOptions}
+                        value={searchMode}
+                        onChange={handleSearchModeChange}
+                        placeholder="검색 모드 선택"
+                        closeMenuOnSelect={true}
+                        className="search-mode-dropdown"
+                    />
+                    <input className="form-control me-2" type="search" placeholder="Search" aria-label="Search" value={searchQuery} onChange={handleSearchChange} style={{ width: '200px' }} /> {/* 검색어 입력 */}
+                    <button className="btn btn-outline-success" type="submit">검색</button> {/* 검색 버튼 */}
                 </form>
             </div>
 
@@ -124,7 +165,7 @@ const List = () => {
                 pageRangeDisplayed={5}
                 onPageChange={handlePageClick}
                 containerClassName={'pagination'}
-                subContainerClassName={'pages pagination'}  
+                subContainerClassName={'pages pagination'}
                 activeClassName={'active'}
                 previousClassName={'page-item'}
                 nextClassName={'page-item'}
