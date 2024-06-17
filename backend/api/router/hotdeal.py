@@ -44,6 +44,46 @@ class ItemList(BaseModel):
                 )
                 
         return v
+
+class SearchParameters(BaseModel):
+    '''
+        검색시 파라미터들을 선언
+        search_mode: title, title_content 이외 에러
+        search_query: 2글자 이하 에러
+    '''
+    page: int = Field(Query(1, ge=1, description='Page number'))
+    count: int = Field(Query(20, description='Number of items per page'))
+    search_mode: str = Field(Query('title', description='search criteria'))
+    search_query: str = Field(Query(..., description='search query'))
+    order: str = Field(Query('desc', description='time order of items'))
+    
+    @field_validator('search_mode', 'search_query', )
+    @classmethod
+    def check_attrs(cls, v, info: ValidationInfo):
+        
+        if info.field_name == 'search_mode':
+            if v not in ['title', 'title_content']:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Invalid search mode, Valid search mode are : 'title', 'content'" 
+                )
+                
+        if info.field_name == 'search_query':
+            if len(v) < 2:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"검색어는 2자 이상 이어야 합니다."
+                )
+                
+        if info.field_name == 'order':
+            if v not in ['asc', 'desc']:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Time order must be eiter 'asc' or 'desc'"
+                )
+        
+        return v
+    
     
 @hotdeal.get('/', tags=['hotdeal'], response_model=List[Item])
 async def read_items(itemlist: ItemList = Depends()):
@@ -71,7 +111,6 @@ async def read_items(itemlist: ItemList = Depends()):
         
     query += f"ORDER BY time {order} OFFSET {(page-1)*count} LIMIT {count}"
     
-    print(query)
     if categories:
         result = conn.execute(query, categories).fetchall()
     else:
@@ -111,3 +150,44 @@ async def read_item_detail(site: str = "fm", url: str = "https://www.fmkorea.com
     return detail
     
 # @hotdeal.get('/')
+
+@hotdeal.get('/search', tags=['hotdeal'], response_model= List[Item])
+async def search(p: SearchParameters = Depends()):
+    
+    conn = db.get_connection()
+    
+    page = p.page
+    count = p.count
+    search_mode = p.search_mode
+    search_query = p.search_query
+    order = p.order
+    
+    
+    columns = list(Item.model_fields)
+    
+    if search_mode == 'title_content':     
+        query = f"""
+            SELECT DISTINCT fm.*
+            FROM fm
+            WHERE fm.url IN (
+                SELECT url
+                FROM fm_detail
+                WHERE article LIKE '%{search_query}%'
+                UNION
+                SELECT url
+                FROM fm_detail
+                WHERE title LIKE '%{search_query}%'
+            )
+        """             
+    elif search_mode == 'title':
+        query = f"""
+            SELECT DISTINCT *
+            FROM fm
+            WHERE title LIKE '%{search_query}%'
+        """
+        
+    query += f"ORDER BY time {order} OFFSET {(page-1)*count} LIMIT {count}"
+    
+    result = conn.execute(query).fetchall()
+    search_items: List[Item] = [Item(**dict(zip(columns,item))) for item in result]
+    return search_items
