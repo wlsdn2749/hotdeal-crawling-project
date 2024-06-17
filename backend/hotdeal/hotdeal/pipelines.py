@@ -6,7 +6,7 @@
 
 # useful for handling different item types with a single interface
 from itemadapter import ItemAdapter
-from hotdeal.utils import convert_to_datetime, convert_to_datetime_detail
+from hotdeal.utils import convert_to_datetime, convert_to_datetime_detail, ArcaUtils
 import pickle
 import re
 import base64
@@ -29,8 +29,17 @@ class HotdealPipeline:
         item['comment'] = re.sub(r'[\[\]]', '', item['comment'])
 
         # url, site 필드 처리
-        item['url'] = "https://www.fmkorea.com" + item['url']
         item['site'] = item['site'].strip()
+        item['deliveryfee'] = item['deliveryfee'].strip()
+        item['price'] = item['price'].strip()
+        
+        if item['site'] == 'fm':
+            item['url'] = "https://www.fmkorea.com" + item['url']
+            item['time'] = convert_to_datetime(item['time'].strip())
+        elif item['site'] == 'arca':
+            item['url'] == "https://arca.live" + item['url']
+            item['time'] = ArcaUtils.convert_iso_to_str(item['time'].strip())
+        
         
         # title 필드 처리
         
@@ -44,7 +53,7 @@ class HotdealPipeline:
             
             Output -> YYYY-MM-DD HH:MM
         """
-        item['time'] = convert_to_datetime(item['time'].strip())
+        
 
         # author 필드 처리
         item['author'] = re.sub(r'[\s/]', '', item['author'])

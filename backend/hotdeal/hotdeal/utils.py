@@ -24,14 +24,27 @@ def convert_to_datetime(input_str):
 
 def convert_to_datetime_detail(time_str: str) -> str:
     now = datetime.now()
-    if "분전" in time_str:
-        minutes = int(time_str.replace("분전", "").strip())
+    if "분전" in time_str or "minutes ago" in time_str:
+        minutes = int(time_str.replace("분전", "").replace("minutes ago", "").strip())
         result_time = now - timedelta(minutes=minutes)
-    elif "시간전" in time_str:
-        hours = int(time_str.replace("시간전", "").strip())
+    elif "시간전" in time_str or "hours ago" in time_str:
+        hours = int(time_str.replace("시간전", "").replace("hours ago", "").strip())
         result_time = now - timedelta(hours=hours)
         
     else:
         return time_str
     
     return result_time.strftime("%Y-%m-%d %H:%M")
+
+
+class ArcaUtils:
+    @staticmethod
+    def convert_iso_to_str(iso_string):
+        # 문자열을 datetime 객체로 변환
+        datetime_obj = datetime.strptime(iso_string, '%Y-%m-%dT%H:%M:%S.%fZ')
+        
+        # 원하는 형식으로 변환
+        formatted_string = datetime_obj.strftime('%Y-%m-%d %H:%M')
+        
+        return formatted_string
+    

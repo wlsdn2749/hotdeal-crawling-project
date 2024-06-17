@@ -22,7 +22,11 @@ class HotdealItem(scrapy.Item):
     time: str
     author: str
     
-
+@dataclass
+class HotdealItemArca(HotdealItem):
+    views: int
+    
+    
 @dataclass
 class HotdealItemDetail(scrapy.Item):
     site: str
