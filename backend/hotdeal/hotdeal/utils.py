@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+import json
 
 def convert_to_datetime(input_str):
     try:
@@ -47,4 +48,14 @@ class ArcaUtils:
         formatted_string = datetime_obj.strftime('%Y-%m-%d %H:%M')
         
         return formatted_string
+
+class DataUtils:
+    
+    @staticmethod
+    def get_site_category(site):
+        with open(f"./hotdeal/static/categories_{site}.json", 'r', encoding='utf-8') as f:
+            return json.load(f)
+        
+    
+    
     
