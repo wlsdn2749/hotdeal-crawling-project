@@ -38,11 +38,22 @@ class HotdealPipeline:
             item['comment'] = '0'
         item['comment'] = re.sub(r'[\[\]]', '', item['comment'])
 
-        # url, site 필드 처리
+        # site, deliveryfee, price, view 필드 처리
         item['site'] = item['site'].strip()
         item['deliveryfee'] = item['deliveryfee'].strip()
         item['price'] = item['price'].strip()
         
+
+        """
+            Time Field Process
+            
+            Input 1 = HH:MM
+            Input 2 = YYYY.MM.DD
+            Input 3 = MM-DD
+            
+            Output -> YYYY-MM-DD HH:MM
+        """
+                
         if item['site'] == 'fm':
             item['url'] = "https://www.fmkorea.com" + item['url']
             item['time'] = convert_to_datetime(item['time'].strip())
@@ -50,21 +61,24 @@ class HotdealPipeline:
         elif item['site'] == 'arca':
             item['url'] = "https://arca.live" + item['url']
             item['time'] = ArcaUtils.convert_iso_to_str(item['time'].strip())
+            item['views'] = item['views'].strip()
+            
+        elif item['site'] == 'qz':
+            item['url'] = "https://quasarzone.com" + item['url']
+            item['time'] = convert_to_datetime(item['time'].strip())
+            item['views'] = item['views'].strip()
+            item['shoppingmall'] = re.search(r'\[(.*?)\]', item['title']).group(1)  
+            
+            match = re.search(r'\[(.*?)\]', item['shoppingmall'])
+            if match:
+                item['shoppingmall'] = match.group(1) if match.group(1) else "기타 쇼핑몰"
+            else:
+                item['shoppingmall'] = "기타 쇼핑몰"
         
         
         # title 필드 처리
         
         item['title'] = item['title'].strip()
-
-        """
-            Time Field Process
-            
-            Input 1 = HH:MM
-            Input 2 = YYYY.MM.DD
-            
-            Output -> YYYY-MM-DD HH:MM
-        """
-        
 
         # author 필드 처리
         item['author'] = re.sub(r'[\s/]', '', item['author'])
