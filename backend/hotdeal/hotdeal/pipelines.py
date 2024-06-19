@@ -6,7 +6,7 @@
 
 # useful for handling different item types with a single interface
 from itemadapter import ItemAdapter
-from hotdeal.utils import convert_to_datetime, convert_to_datetime_detail, ArcaUtils, DataUtils
+from hotdeal.utils import convert_to_datetime, convert_to_datetime_detail, ArcaUtils, DataUtils, QzUtils
 import pickle
 import re
 import base64
@@ -103,18 +103,29 @@ class HotdealDetailPipeline:
         item['price'] = item['price'].strip()
         item['deliveryfee'] = item['deliveryfee'].strip()
         item['product_name'] = item['product_name'].strip()
+        item['likes'] = item['likes'].strip()
+        
+        
         
         if item['site'] == "fm":
             for comments in item['comments']:
-                comments['author'] = comments['author'].strip()
                 comments['content'] = [content.strip() for content in comments['content']]
                 comments['date'] = convert_to_datetime_detail(comments['date'].replace(" ", "")) 
+                comments['author'] = comments['author'].strip()
                 
         elif item['site'] == "arca":
             for comments in item['comments']:
-                comments['author'] = comments['author'].strip()
                 comments['content'] = comments['content'].strip() if comments['content'] is not None else "Blank"
+                comments['author'] = comments['author'].strip()
                 comments['date'] = ArcaUtils.convert_iso_to_str(comments['date'].replace(" ", "")) 
+                
+        elif item['site'] == "qz":
+            for comments in item['comments']:
+                comments['content'] = comments['content'].strip() if comments['content'] is not None else "Blank"
+                comments['date'] = QzUtils.convert_timeformat(comments['date'].replace(" ", ""))
+            
+            item['date'] = QzUtils.convert_timeformat(item['date'])
+            item['product_name'] = QzUtils.extract_product_name(item['title'])
             
         item['comments'] = base64.b64encode(pickle.dumps(item['comments'])).decode('utf-8') # pickle로 comment data 직렬화 -> base64 encoding
         

@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 import json
+import re
 
 def convert_to_datetime(input_str):
     try:
@@ -12,8 +13,13 @@ def convert_to_datetime(input_str):
             date_obj = datetime.strptime(input_str, '%Y.%m.%d').date()
             time_obj = datetime.min.time()  # 최소 시간을 기본으로 사용
         except ValueError:
-            date_obj = datetime.now().date()  # 현재 날짜를 기본으로 사용
-            time_obj = datetime.min.time()  # 최소 시간을 기본으로 사용
+            try:
+                # 시간 날짜 형식인지 확인하고 변환 
+                date_time_obj = datetime.strptime(input_str, '%Y.%m.%d').date()
+                time_obj = datetime.min.time()  # 최소 시간을 기본으로 사용
+            except ValueError:
+                date_obj = datetime.now().date()  # 현재 날짜를 기본으로 사용
+                time_obj = datetime.min.time()  # 최소 시간을 기본으로 사용
 
     # datetime 객체를 원하는 형식으로 조합
     datetime_combined = datetime.combine(date_obj, time_obj)
@@ -56,6 +62,12 @@ class DataUtils:
         with open(f"./hotdeal/static/categories_{site}.json", 'r', encoding='utf-8') as f:
             return json.load(f)
         
+class QzUtils:
     
+    @staticmethod
+    def convert_timeformat(date):
+        return datetime.strptime(date, '%Y.%m.%d %H:%M').strftime('%Y-%m-%d %H:%M')
     
-    
+    @staticmethod
+    def extract_product_name(title):
+        return re.sub(r'\[.*?\]', '', title).strip()
