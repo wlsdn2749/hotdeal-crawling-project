@@ -4,12 +4,14 @@ import base64
 from fastapi import APIRouter, Depends, Query, HTTPException
 from typing import Optional, List, Annotated, Literal
 from pydantic import Field, field_validator, BaseModel, ValidationInfo
-from api.database import db
-from api.utils import load_valid_categories
-from api.model import Item, HotdealItemDetail
+from app.database import db
+from app.utils import load_valid_categories
+from app.model import Item, HotdealItemDetail
+
 hotdeal = APIRouter(prefix='/hotdeal')
 
-VALID_CATEGORIES = load_valid_categories("./api/static/categories_fm.txt")
+VALID_CATEGORIES = load_valid_categories("./app/static/categories_fm.txt")
+VALID_SITES = db.available_sites
 
 class ItemList(BaseModel):
     '''
@@ -19,12 +21,25 @@ class ItemList(BaseModel):
     page: int = Field(Query(1, ge=1, description='Page number'))
     count: int = Field(Query(20, description='Number of items per page'))
     categories: List[str] = Field(Query([], description='List of categories'))
+    sites: List[str] = Field(Query([], description='List of site'))
     order: str = Field(Query('desc', description='time order of items'))
     
     @field_validator('categories', 'order')
     @classmethod
     def check_attrs(cls, v, info: ValidationInfo):
         
+        if info.field_name == 'sites':
+            if not v:
+                return None
+            
+            invalid_sites = [site for site in v if site not in VALID_SITES]
+            
+            if invalid_sites:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Invalid sites: {', '.join(invalid_sites)}. Valid categories are: {', '.join(VALID_SITES)}"
+                )
+            
         if info.field_name == 'categories':
             if not v:
                 return None
@@ -44,7 +59,6 @@ class ItemList(BaseModel):
                 )
                 
         return v
-
 class SearchParameters(BaseModel):
     '''
         검색시 파라미터들을 선언
@@ -84,7 +98,6 @@ class SearchParameters(BaseModel):
         
         return v
     
-    
 @hotdeal.get('/', tags=['hotdeal'], response_model=List[Item])
 async def read_items(itemlist: ItemList = Depends()):
     
@@ -92,6 +105,7 @@ async def read_items(itemlist: ItemList = Depends()):
     page = itemlist.page
     count = itemlist.count
     order = itemlist.order
+    sites = itemlist.sites
     
     
     conn = db.get_connection()
@@ -99,28 +113,37 @@ async def read_items(itemlist: ItemList = Depends()):
     
     query = f"""
         SELECT *
-        FROM fm
+        FROM merged
     """
-    
-    # Validate categories if provide
 
+    optional_query = []
+    query_parameters = []
+    
     if categories:     
         categories_placeholder = ', '.join('?' * len(categories))
-        query += f" WHERE category IN ({categories_placeholder})"
-
+        categories_query = f"category IN ({categories_placeholder})"
+        optional_query.append(categories_query)
+        query_parameters.extend(categories)
+        
+    if sites:
+        sites_placeholder = ', '.join('?' * len(sites))
+        sites_query = f"site IN ({sites_placeholder})"
+        optional_query.append(sites_query)
+        query_parameters.extend(sites)
+        
+    if optional_query:
+        query += " WHERE " + " AND ".join(optional_query)
         
     query += f"ORDER BY time {order} OFFSET {(page-1)*count} LIMIT {count}"
     
-    if categories:
-        result = conn.execute(query, categories).fetchall()
-    else:
-        result = conn.execute(query).fetchall()
-    
+    result = conn.execute(query, query_parameters).fetchall()
+
     items: List[Item] = [Item(**dict(zip(columns,item))) for item in result]
     return items
 
 @hotdeal.get('/detail', tags=['hotdeal'], response_model = HotdealItemDetail)
 async def read_item_detail(site: str = "fm", url: str = "https://www.fmkorea.com/7138477950"):
+    
     '''
         site와 url을 통해 item을 읽어옴
         
@@ -148,8 +171,6 @@ async def read_item_detail(site: str = "fm", url: str = "https://www.fmkorea.com
     detail: HotdealItemDetail = dict(zip(colmuns, result))
     detail["comments"] = pickle.loads(base64.b64decode(detail["comments"].encode('utf-8')))
     return detail
-    
-# @hotdeal.get('/')
 
 @hotdeal.get('/search', tags=['hotdeal'], response_model= List[Item])
 async def search(p: SearchParameters = Depends()):
@@ -167,22 +188,22 @@ async def search(p: SearchParameters = Depends()):
     
     if search_mode == 'title_content':     
         query = f"""
-            SELECT DISTINCT fm.*
+            SELECT DISTINCT merged.*
             FROM fm
-            WHERE fm.url IN (
+            WHERE merged.url IN (
                 SELECT url
-                FROM fm_detail
+                FROM merged_detail
                 WHERE article LIKE '%{search_query}%'
                 UNION
                 SELECT url
-                FROM fm_detail
+                FROM merged_detail
                 WHERE title LIKE '%{search_query}%'
             )
         """             
     elif search_mode == 'title':
         query = f"""
             SELECT DISTINCT *
-            FROM fm
+            FROM merged
             WHERE title LIKE '%{search_query}%'
         """
         

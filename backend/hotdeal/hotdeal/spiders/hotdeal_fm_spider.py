@@ -18,7 +18,7 @@ class QuoteSpider(scrapy.Spider):
         # ]
         
         urls = [
-            f"https://www.fmkorea.com/index.php?mid=hotdeal&page={idx}" for idx in range(10)
+            f"https://www.fmkorea.com/index.php?mid=hotdeal&page={idx}" for idx in range(1, 11)
         ]
         
         for url in urls:
@@ -40,4 +40,5 @@ class QuoteSpider(scrapy.Spider):
                 "category": quote.xpath(".//span[contains(@class, 'category')]/a/text()").get(),
                 "time": quote.xpath(".//span[contains(@class, 'regdate')]/text()").get(),
                 "author": quote.xpath(".//span[contains(@class, 'author')]/text()").get(),
+                "views": 0,
             }

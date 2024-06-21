@@ -1,7 +1,7 @@
 from typing import Union
 from fastapi import FastAPI
 
-from api.router.hotdeal import hotdeal
+from app.router.hotdeal import hotdeal
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()

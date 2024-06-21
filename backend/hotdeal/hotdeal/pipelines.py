@@ -6,7 +6,7 @@
 
 # useful for handling different item types with a single interface
 from itemadapter import ItemAdapter
-from hotdeal.utils import convert_to_datetime, convert_to_datetime_detail, ArcaUtils, DataUtils, QzUtils
+from hotdeal.utils import convert_to_datetime, convert_to_datetime_detail, FmUtils, ArcaUtils, DataUtils, QzUtils
 import pickle
 import re
 import base64
@@ -56,7 +56,7 @@ class HotdealPipeline:
                 
         if item['site'] == 'fm':
             item['url'] = "https://www.fmkorea.com" + item['url']
-            item['time'] = convert_to_datetime(item['time'].strip())
+            item['time'] = FmUtils.adjust_time(convert_to_datetime(item['time'].strip()))
             
         elif item['site'] == 'arca':
             item['url'] = "https://arca.live" + item['url']
@@ -75,7 +75,14 @@ class HotdealPipeline:
             else:
                 item['shoppingmall'] = "기타 쇼핑몰"
         
-        
+        elif item['site'] == 'ruli':
+            item['shoppingmall'] = re.search(r'\[(.*?)\]', item['title']).group(1)
+            item['time'] = convert_to_datetime(item['time'].strip())
+            item['views'] = item['views'].strip()
+            item['author'] = item['author'].strip()
+            item['price'] = "가격 미제공"
+            item['deliveryfee'] = "배송료 미제공"
+            
         # title 필드 처리
         
         item['title'] = item['title'].strip()
@@ -119,10 +126,11 @@ class HotdealDetailPipeline:
                 comments['author'] = comments['author'].strip()
                 comments['date'] = ArcaUtils.convert_iso_to_str(comments['date'].replace(" ", "")) 
                 
+                
         elif item['site'] == "qz":
-            for comments in item['comments']:
-                comments['content'] = comments['content'].strip() if comments['content'] is not None else "Blank"
-                comments['date'] = QzUtils.convert_timeformat(comments['date'].replace(" ", ""))
+            # for comments in item['comments']: #TODO 지금 구현 안됨
+            #     comments['content'] = comments['content'].strip() if comments['content'] is not None else "Blank"
+                # comments['date'] = QzUtils.convert_timeformat(comments['date'].replace(" ", ""))
             
             item['date'] = QzUtils.convert_timeformat(item['date'])
             item['product_name'] = QzUtils.extract_product_name(item['title'])

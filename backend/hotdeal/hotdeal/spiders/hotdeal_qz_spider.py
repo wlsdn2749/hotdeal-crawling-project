@@ -13,7 +13,7 @@ class QzSpider(scrapy.Spider):
         
     def start_requests(self):
         urls = [
-            'https://quasarzone.com/bbs/qb_saleinfo?page=1'
+            f'https://quasarzone.com/bbs/qb_saleinfo?page={idx}' for idx in range(1, 11)
         ]
         
         for url in urls:

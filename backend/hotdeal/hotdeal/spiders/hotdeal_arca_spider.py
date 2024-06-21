@@ -13,7 +13,7 @@ class ArcaSpider(scrapy.Spider):
         
     def start_requests(self):
         urls = [
-            'https://arca.live/b/hotdeal?p=1'
+            f'https://arca.live/b/hotdeal?p={idx}' for idx in range(1, 11)
         ]
         
         for url in urls:

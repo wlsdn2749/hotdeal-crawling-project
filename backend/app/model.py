@@ -14,6 +14,7 @@ class Item(BaseModel):
     category: str
     time: datetime
     author: str
+    views: str
     
 class HotdealItemDetail(BaseModel):
     site: str
