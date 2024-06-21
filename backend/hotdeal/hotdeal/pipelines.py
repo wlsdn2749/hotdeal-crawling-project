@@ -6,7 +6,7 @@
 
 # useful for handling different item types with a single interface
 from itemadapter import ItemAdapter
-from hotdeal.utils import convert_to_datetime, convert_to_datetime_detail, FmUtils, ArcaUtils, DataUtils, QzUtils
+from hotdeal.utils import convert_to_datetime, convert_to_datetime_detail, FmUtils, ArcaUtils, DataUtils, QzUtils, RuliUtils
 import pickle
 import re
 import base64
@@ -103,7 +103,7 @@ class HotdealDetailPipeline:
         item['shoppingmall'] = item['shoppingmall'].strip()
         
         # article이 아예 없는 경우
-        if item['article'] is None:
+        if item['article'] is None or item['article'] == 'lazy':
             item['article'] = ""
         
         item['title'] = item['title'].strip()
@@ -111,22 +111,19 @@ class HotdealDetailPipeline:
         item['deliveryfee'] = item['deliveryfee'].strip()
         item['product_name'] = item['product_name'].strip()
         item['likes'] = item['likes'].strip()
-        
+        item['author'] = item['author'].strip()
         
         
         if item['site'] == "fm":
             for comments in item['comments']:
                 comments['content'] = [content.strip() for content in comments['content']]
                 comments['date'] = convert_to_datetime_detail(comments['date'].replace(" ", "")) 
-                comments['author'] = comments['author'].strip()
-                
+                comments['author'] = comments['author'].strip()          
         elif item['site'] == "arca":
             for comments in item['comments']:
                 comments['content'] = comments['content'].strip() if comments['content'] is not None else "Blank"
                 comments['author'] = comments['author'].strip()
-                comments['date'] = ArcaUtils.convert_iso_to_str(comments['date'].replace(" ", "")) 
-                
-                
+                comments['date'] = ArcaUtils.convert_iso_to_str(comments['date'].replace(" ", ""))         
         elif item['site'] == "qz":
             # for comments in item['comments']: #TODO 지금 구현 안됨
             #     comments['content'] = comments['content'].strip() if comments['content'] is not None else "Blank"
@@ -134,6 +131,28 @@ class HotdealDetailPipeline:
             
             item['date'] = QzUtils.convert_timeformat(item['date'])
             item['product_name'] = QzUtils.extract_product_name(item['title'])
+        elif item['site'] == "ruli":
+            for comments in item['comments']:
+                comments['content'] = comments['content'].strip() if comments['content'] is not None else "Blank"
+                comments['author'] = comments['author'].strip()
+                comments['date'] = convert_to_datetime(comments['date'].strip())
+            
+            item['date'] = RuliUtils.convert_timeformat(item['date'])
+            item['price'] = '가격 미제공'
+            item['deliveryfee'] = '배송비 미제공'
+        
+            match = re.search(r'\[(.*?)\]', item['title'])
+            if match:
+                item['shoppingmall'] = match.group(1) if match.group(1) else "기타 쇼핑몰"
+            else:
+                item['shoppingmall'] = "기타 쇼핑몰"
+                
+            item['product_name'] = RuliUtils.extract_product_name(item['title'])
+            item['views'] = RuliUtils.remove_whitespace_views(item['views'])
+            item['comment_count'] = DataUtils.remove_parentheses(item['comment_count'])
+            
+            if item['related_url'] is None or item['related_url'] == "":
+                item['related_url'] = '연관 url 미제공'
             
         item['comments'] = base64.b64encode(pickle.dumps(item['comments'])).decode('utf-8') # pickle로 comment data 직렬화 -> base64 encoding
         

@@ -15,8 +15,8 @@ def convert_to_datetime(input_str):
         except ValueError:
             try:
                 # 시간 날짜 형식인지 확인하고 변환 
-                date_time_obj = datetime.strptime(input_str, '%Y.%m.%d').date()
-                time_obj = datetime.min.time()  # 최소 시간을 기본으로 사용
+                date_time_obj = datetime.strptime(input_str, '%Y.%m.%d %H:%M').date()
+                return date_time_obj.strftime('%Y-%m-%d %H:%M')
             except ValueError:
                 date_obj = datetime.now().date()  # 현재 날짜를 기본으로 사용
                 time_obj = datetime.min.time()  # 최소 시간을 기본으로 사용
@@ -84,6 +84,10 @@ class DataUtils:
         with open(f"./hotdeal/static/categories_{site}.json", 'r', encoding='utf-8') as f:
             return json.load(f)
         
+    @staticmethod
+    def remove_parentheses(str):
+        return str.replace("[", "").replace("]", "")
+        
 class QzUtils:
     
     @staticmethod
@@ -93,3 +97,18 @@ class QzUtils:
     @staticmethod
     def extract_product_name(title):
         return re.sub(r'\[.*?\]', '', title).strip()
+    
+    
+class RuliUtils:
+    
+    @staticmethod
+    def convert_timeformat(date):
+        return datetime.strptime(date, '%Y.%m.%d (%H:%M:%S)').strftime('%Y-%m-%d %H:%M')
+    
+    @staticmethod
+    def extract_product_name(title):
+        return re.sub(r'\[.*?\]', '', title).strip()
+    
+    @staticmethod
+    def remove_whitespace_views(view):
+        return view.replace("조회", "").replace("\t", "").strip()
