@@ -12,5 +12,5 @@ COPY api ./api/
 
 RUN poetry install --no-root
 
-CMD ["poetry","run","uvicorn","api.main:app","--reload","--host","0.0.0.0","--port","8001","--root-path","/api/v1"]
+CMD ["poetry","run","uvicorn","app.main:app","--reload","--host","0.0.0.0","--port","8001","--root-path","/api/v1"]
 EXPOSE 8001
