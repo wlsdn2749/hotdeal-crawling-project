@@ -4,7 +4,7 @@ import { fetchItems, fetchItemsByCategories, searchItems } from '../api/Api';
 import '../assets/List.css';
 import HotDealItem from './HotDealItem';
 import ReactPaginate from 'react-paginate';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const categoryOptions = [
     { value: '먹거리', label: '먹거리' },
@@ -30,10 +30,11 @@ const searchModeOptions = [
     { value: 'title', label: '제목' },
     { value: 'title_content', label: '제목+내용' }
 ];
-
 const siteOptions = [
     { value: 'fm', label: '에펨코리아' },
-    { value: 'qz', label: '퀘이사존' }
+    { value: 'qz', label: '퀘이사존' },
+    { value: 'ruli', label: '루리웹' },
+    { value: 'arca', label: '아카라이브' }
 ];
 
 const List = () => {
@@ -49,6 +50,14 @@ const List = () => {
     const [searchMode, setSearchMode] = useState(searchModeOptions[0]); // 검색 모드 상태 변수
     const itemsPerPage = 10;
     const navigate = useNavigate();
+    const location = useLocation(); // 현재 URL의 쿼리 파라미터를 가져오기 위해 useLocation 사용
+
+    useEffect(() => {
+        const params = new URLSearchParams(location.search);
+        const pageParam = params.get('page');
+        const currentPage = pageParam ? Number(pageParam) : 1;
+        setPage(currentPage);
+    }, [location.search]);
 
     useEffect(() => {
         const getItems = async () => {
@@ -71,7 +80,7 @@ const List = () => {
 
     const handlePageClick = (event) => {
         const selectedPage = event.selected + 1;
-        setPage(selectedPage);
+        navigate(`?page=${selectedPage}`);
     };
 
     const handleItemClick = (item) => {
@@ -122,43 +131,50 @@ const List = () => {
         <div className="List">
             <div className="search-container">
                 <div className="dropdown-container">
-                    <Select
-                        isMulti
-                        options={categoryOptions}
-                        value={selectedCategories}
-                        onChange={handleCategoryChange}
-                        placeholder="카테고리 분류"
-                        closeMenuOnSelect={false}
-                    />
-                    <Select
-                        isMulti
-                        options={siteOptions}
-                        value={selectedSites}
-                        onChange={handleSiteChange}
-                        placeholder="사이트 분류"
-                        closeMenuOnSelect={false}
-                        className="site-dropdown"
-                    />
-                    <Select
-                        options={orderOptions}
-                        value={order}
-                        onChange={handleOrderChange}
-                        placeholder="정렬 방식 선택"
-                        closeMenuOnSelect={true}
-                        className="order-dropdown"
-                    />
+                    <div className="react-select-container">
+                        <Select
+                            isMulti
+                            options={categoryOptions}
+                            value={selectedCategories}
+                            onChange={handleCategoryChange}
+                            placeholder="카테고리 분류"
+                            closeMenuOnSelect={false}
+                        />
+                    </div>
+                    <div className="react-select-container">
+                        <Select
+                            isMulti
+                            options={siteOptions}
+                            value={selectedSites}
+                            onChange={handleSiteChange}
+                            placeholder="사이트 분류"
+                            closeMenuOnSelect={false}
+                            className="site-dropdown"
+                        />
+                    </div>
+                    <div className="react-select-container">
+                        <Select
+                            options={orderOptions}
+                            value={order}
+                            onChange={handleOrderChange}
+                            placeholder="정렬 방식 선택"
+                            closeMenuOnSelect={true}
+                            className="order-dropdown"
+                        />
+                    </div>
                 </div>
 
                 <form className="d-flex" onSubmit={handleSearchSubmit}>
-                    <Select
-                        options={searchModeOptions}
-                        value={searchMode}
-                        onChange={handleSearchModeChange}
-                        placeholder="검색 모드 선택"
-                        closeMenuOnSelect={true}
-                        className="search-mode-dropdown"
-                    />
-                    <input className="form-control me-2" type="search" placeholder="Search" aria-label="Search" value={searchQuery} onChange={handleSearchChange} style={{ width: '200px' }} /> {/* 검색어 입력 */}
+                    <div className="react-select-container search-mode-dropdown">
+                        <Select
+                            options={searchModeOptions}
+                            value={searchMode}
+                            onChange={handleSearchModeChange}
+                            placeholder="검색 모드 선택"
+                            closeMenuOnSelect={true}
+                        />
+                    </div>
+                    <input className="form-control me-2" type="search" placeholder="Search" aria-label="Search" value={searchQuery} onChange={handleSearchChange} /> {/* 검색어 입력 */}
                     <button className="btn btn-outline-success" type="submit">검색</button> {/* 검색 버튼 */}
                 </form>
             </div>

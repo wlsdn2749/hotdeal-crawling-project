@@ -8,6 +8,10 @@ const siteMapping = (site) => {
             return '에펨코리아';
         case 'qz':
             return '퀘이사존';
+        case 'ruli':
+            return '루리웹';
+        case 'arca':
+            return '아카라이브';
         default:
             return site;
     }
