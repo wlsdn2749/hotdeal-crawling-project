@@ -27,15 +27,15 @@ class RuliSpider(scrapy.Spider):
             
             yield { 
                 "site": self.site,
-                "url": base.xpath(".//div[contains(@class, 'relative')]//a[contains(@class, 'deco')]/@href").get() ,
-                "recommend": base.xpath(".//td[contains(@class, 'recomd')]/text()").get(),
+                "url": ruli.xpath(".//div[contains(@class, 'relative')]//a[contains(@class, 'deco')]/@href").get() ,
+                "recommend": ruli.xpath(".//td[contains(@class, 'recomd')]/text()").get(),
                 "title": ruli.xpath(".//div[contains(@class, 'relative')]//a[contains(@class, 'deco')]/text()").get() ,
                 "comment": ruli.xpath(".//a[contains(@class, 'num_reply')]/span/text()").get(),
                 "shoppingmall": "lazy", #TODO title에서 [] 때면됨
                 "price": "lazy",
                 "deliveryfee": "lazy",
                 "category": ruli.xpath(".//td[contains(@class, 'divsn text_over')]/a/text()").get(),
-                "time": base.xpath(".//td[contains(@class, 'time')]/text()").get(), # TODO strip()
+                "time": ruli.xpath(".//td[contains(@class, 'time')]/text()").get(), # TODO strip()
                 "author": ruli.xpath(".//td[contains(@class, 'writer text_over')]/a/text()").get(), #TODO strip()
                 "views": ruli.xpath(".//td[contains(@class, 'hit')]/text()").get() # TODO strip()
             }
