@@ -69,6 +69,7 @@ const List = () => {
                 console.log('서버에서 받아온 items', items);
                 setItems(Array.isArray(items) ? items : []);
                 setPageCount(Math.ceil(total / itemsPerPage));
+                setError(null); // 에러 초기화
                 setLoading(false);
             } catch (error) {
                 setError(error);
@@ -121,9 +122,16 @@ const List = () => {
             setItems(Array.isArray(items) ? items : []);
             setPageCount(Math.ceil(total / itemsPerPage));
             setPage(1); // 검색할 때 페이지를 1로 초기화
+            setError(null); // 에러 초기화
             setLoading(false);
         } catch (error) {
-            setError(error);
+            if (error.response && error.response.status === 400) {
+                setItems([]); // items를 빈 배열로 설정
+                setPageCount(0); // 페이지 수를 0으로 설정
+                setError({ message: '일치하는 항목이 없습니다.' });
+            } else {
+                setError(error);
+            }
             setLoading(false);
         }
     };
@@ -182,6 +190,8 @@ const List = () => {
 
             {loading ? (
                 <div>Loading...</div>
+            ) : error && error.message === '일치하는 항목이 없습니다.' ? (
+                <div className="no-matches">{error.message}</div>
             ) : error ? (
                 <div>Error: {error.message}</div>
             ) : (
@@ -192,7 +202,7 @@ const List = () => {
                 </div>
             )}
 
-            {pageCount > 0 && ( // pageCount가 0보다 클 때만 ReactPaginate를 렌더링
+            {pageCount > 0 && !error && ( // pageCount가 0보다 크고 에러가 없을 때만 ReactPaginate를 렌더링
                 <ReactPaginate
                     previousLabel={'«'}
                     nextLabel={'»'}
