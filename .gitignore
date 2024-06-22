@@ -13,3 +13,4 @@ tutorial
 *.txt
 
 # static
+*.csv

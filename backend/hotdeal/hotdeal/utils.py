@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 import json
+import re
 
 def convert_to_datetime(input_str):
     try:
@@ -12,8 +13,13 @@ def convert_to_datetime(input_str):
             date_obj = datetime.strptime(input_str, '%Y.%m.%d').date()
             time_obj = datetime.min.time()  # 최소 시간을 기본으로 사용
         except ValueError:
-            date_obj = datetime.now().date()  # 현재 날짜를 기본으로 사용
-            time_obj = datetime.min.time()  # 최소 시간을 기본으로 사용
+            try:
+                # 시간 날짜 형식인지 확인하고 변환 
+                date_time_obj = datetime.strptime(input_str, '%Y.%m.%d %H:%M').date()
+                return date_time_obj.strftime('%Y-%m-%d %H:%M')
+            except ValueError:
+                date_obj = datetime.now().date()  # 현재 날짜를 기본으로 사용
+                time_obj = datetime.min.time()  # 최소 시간을 기본으로 사용
 
     # datetime 객체를 원하는 형식으로 조합
     datetime_combined = datetime.combine(date_obj, time_obj)
@@ -37,7 +43,29 @@ def convert_to_datetime_detail(time_str: str) -> str:
     
     return result_time.strftime("%Y-%m-%d %H:%M")
 
-
+class FmUtils:
+    @staticmethod
+    def adjust_time(dt_str):
+        # 문자열을 datetime 객체로 변환 (포맷은 'YYYY-MM-DD HH:MM'로 가정)
+        dt = datetime.strptime(dt_str, '%Y-%m-%d %H:%M')
+        
+        # 현재 시간
+        now = datetime.now()
+        
+        # 시간 비교를 위해 현재 날짜와 주어진 날짜의 시간을 사용
+        # FM에서는 하루가 지나면, 즉 24hrs가 지나면 날짜로 표기되며 여기서는 00:00으로 처리되므로 아래는 동작하지 않음
+        current_time = now.time()
+        given_time = dt.time()
+        
+        # 주어진 시간이 현재 시간보다 더 크다면 하루를 빼줌
+        if given_time > current_time:
+            dt -= timedelta(days=1)
+        
+        # datetime 객체를 문자열로 변환
+        adjusted_dt_str = dt.strftime('%Y-%m-%d %H:%M')
+        return adjusted_dt_str
+            
+    
 class ArcaUtils:
     @staticmethod
     def convert_iso_to_str(iso_string):
@@ -56,6 +84,31 @@ class DataUtils:
         with open(f"./hotdeal/static/categories_{site}.json", 'r', encoding='utf-8') as f:
             return json.load(f)
         
+    @staticmethod
+    def remove_parentheses(str):
+        return str.replace("[", "").replace("]", "")
+        
+class QzUtils:
+    
+    @staticmethod
+    def convert_timeformat(date):
+        return datetime.strptime(date, '%Y.%m.%d %H:%M').strftime('%Y-%m-%d %H:%M')
+    
+    @staticmethod
+    def extract_product_name(title):
+        return re.sub(r'\[.*?\]', '', title).strip()
     
     
+class RuliUtils:
     
+    @staticmethod
+    def convert_timeformat(date):
+        return datetime.strptime(date, '%Y.%m.%d (%H:%M:%S)').strftime('%Y-%m-%d %H:%M')
+    
+    @staticmethod
+    def extract_product_name(title):
+        return re.sub(r'\[.*?\]', '', title).strip()
+    
+    @staticmethod
+    def remove_whitespace_views(view):
+        return view.replace("조회", "").replace("\t", "").strip()

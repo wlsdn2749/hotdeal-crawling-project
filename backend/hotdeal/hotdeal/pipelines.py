@@ -6,7 +6,7 @@
 
 # useful for handling different item types with a single interface
 from itemadapter import ItemAdapter
-from hotdeal.utils import convert_to_datetime, convert_to_datetime_detail, ArcaUtils, DataUtils
+from hotdeal.utils import convert_to_datetime, convert_to_datetime_detail, FmUtils, ArcaUtils, DataUtils, QzUtils, RuliUtils
 import pickle
 import re
 import base64
@@ -38,33 +38,54 @@ class HotdealPipeline:
             item['comment'] = '0'
         item['comment'] = re.sub(r'[\[\]]', '', item['comment'])
 
-        # url, site 필드 처리
+        # site, deliveryfee, price, view 필드 처리
         item['site'] = item['site'].strip()
         item['deliveryfee'] = item['deliveryfee'].strip()
         item['price'] = item['price'].strip()
         
-        if item['site'] == 'fm':
-            item['url'] = "https://www.fmkorea.com" + item['url']
-            item['time'] = convert_to_datetime(item['time'].strip())
-            
-        elif item['site'] == 'arca':
-            item['url'] = "https://arca.live" + item['url']
-            item['time'] = ArcaUtils.convert_iso_to_str(item['time'].strip())
-        
-        
-        # title 필드 처리
-        
-        item['title'] = item['title'].strip()
 
         """
             Time Field Process
             
             Input 1 = HH:MM
             Input 2 = YYYY.MM.DD
+            Input 3 = MM-DD
             
             Output -> YYYY-MM-DD HH:MM
         """
+                
+        if item['site'] == 'fm':
+            item['url'] = "https://www.fmkorea.com" + item['url']
+            item['time'] = FmUtils.adjust_time(convert_to_datetime(item['time'].strip()))
+            
+        elif item['site'] == 'arca':
+            item['url'] = "https://arca.live" + item['url']
+            item['time'] = ArcaUtils.convert_iso_to_str(item['time'].strip())
+            item['views'] = item['views'].strip()
+            
+        elif item['site'] == 'qz':
+            item['url'] = "https://quasarzone.com" + item['url']
+            item['time'] = convert_to_datetime(item['time'].strip())
+            item['views'] = item['views'].strip()
+            item['shoppingmall'] = re.search(r'\[(.*?)\]', item['title']).group(1)  
+            
+            match = re.search(r'\[(.*?)\]', item['shoppingmall'])
+            if match:
+                item['shoppingmall'] = match.group(1) if match.group(1) else "기타 쇼핑몰"
+            else:
+                item['shoppingmall'] = "기타 쇼핑몰"
         
+        elif item['site'] == 'ruli':
+            item['shoppingmall'] = re.search(r'\[(.*?)\]', item['title']).group(1)
+            item['time'] = convert_to_datetime(item['time'].strip())
+            item['views'] = item['views'].strip()
+            item['author'] = item['author'].strip()
+            item['price'] = "가격 미제공"
+            item['deliveryfee'] = "배송료 미제공"
+            
+        # title 필드 처리
+        
+        item['title'] = item['title'].strip()
 
         # author 필드 처리
         item['author'] = re.sub(r'[\s/]', '', item['author'])
@@ -82,25 +103,56 @@ class HotdealDetailPipeline:
         item['shoppingmall'] = item['shoppingmall'].strip()
         
         # article이 아예 없는 경우
-        if item['article'] is None:
+        if item['article'] is None or item['article'] == 'lazy':
             item['article'] = ""
         
         item['title'] = item['title'].strip()
         item['price'] = item['price'].strip()
         item['deliveryfee'] = item['deliveryfee'].strip()
         item['product_name'] = item['product_name'].strip()
+        item['likes'] = item['likes'].strip()
+        item['author'] = item['author'].strip()
+        
         
         if item['site'] == "fm":
             for comments in item['comments']:
-                comments['author'] = comments['author'].strip()
                 comments['content'] = [content.strip() for content in comments['content']]
                 comments['date'] = convert_to_datetime_detail(comments['date'].replace(" ", "")) 
-                
+                comments['author'] = comments['author'].strip()          
         elif item['site'] == "arca":
             for comments in item['comments']:
-                comments['author'] = comments['author'].strip()
                 comments['content'] = comments['content'].strip() if comments['content'] is not None else "Blank"
-                comments['date'] = ArcaUtils.convert_iso_to_str(comments['date'].replace(" ", "")) 
+                comments['author'] = comments['author'].strip()
+                comments['date'] = ArcaUtils.convert_iso_to_str(comments['date'].replace(" ", ""))         
+        elif item['site'] == "qz":
+            # for comments in item['comments']: #TODO 지금 구현 안됨
+            #     comments['content'] = comments['content'].strip() if comments['content'] is not None else "Blank"
+                # comments['date'] = QzUtils.convert_timeformat(comments['date'].replace(" ", ""))
+            
+            item['date'] = QzUtils.convert_timeformat(item['date'])
+            item['product_name'] = QzUtils.extract_product_name(item['title'])
+        elif item['site'] == "ruli":
+            for comments in item['comments']:
+                comments['content'] = comments['content'].strip() if comments['content'] is not None else "Blank"
+                comments['author'] = comments['author'].strip()
+                comments['date'] = convert_to_datetime(comments['date'].strip())
+            
+            item['date'] = RuliUtils.convert_timeformat(item['date'])
+            item['price'] = '가격 미제공'
+            item['deliveryfee'] = '배송비 미제공'
+        
+            match = re.search(r'\[(.*?)\]', item['title'])
+            if match:
+                item['shoppingmall'] = match.group(1) if match.group(1) else "기타 쇼핑몰"
+            else:
+                item['shoppingmall'] = "기타 쇼핑몰"
+                
+            item['product_name'] = RuliUtils.extract_product_name(item['title'])
+            item['views'] = RuliUtils.remove_whitespace_views(item['views'])
+            item['comment_count'] = DataUtils.remove_parentheses(item['comment_count'])
+            
+            if item['related_url'] is None or item['related_url'] == "":
+                item['related_url'] = '연관 url 미제공'
             
         item['comments'] = base64.b64encode(pickle.dumps(item['comments'])).decode('utf-8') # pickle로 comment data 직렬화 -> base64 encoding
         
