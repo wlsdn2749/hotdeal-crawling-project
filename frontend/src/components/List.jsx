@@ -30,6 +30,7 @@ const searchModeOptions = [
     { value: 'title', label: '제목' },
     { value: 'title_content', label: '제목+내용' }
 ];
+
 const siteOptions = [
     { value: 'fm', label: '에펨코리아' },
     { value: 'qz', label: '퀘이사존' },
@@ -191,29 +192,31 @@ const List = () => {
                 </div>
             )}
 
-            <ReactPaginate
-                previousLabel={'«'}
-                nextLabel={'»'}
-                breakLabel={'...'}
-                breakClassName={'break-me'}
-                pageCount={pageCount}
-                marginPagesDisplayed={2}
-                pageRangeDisplayed={5}
-                onPageChange={handlePageClick}
-                containerClassName={'pagination'}
-                subContainerClassName={'pages pagination'}
-                activeClassName={'active'}
-                previousClassName={'page-item'}
-                nextClassName={'page-item'}
-                pageClassName={'page-item'}
-                previousLinkClassName={'page-link'}
-                nextLinkClassName={'page-link'}
-                pageLinkClassName={'page-link'}
-                breakLinkClassName={'page-link'}
-                activeLinkClassName={'active'}
-                disabledClassName={'disabled'}
-                forcePage={page - 1} // 현재 페이지를 반영하기 위해 forcePage 사용
-            />
+            {pageCount > 0 && ( // pageCount가 0보다 클 때만 ReactPaginate를 렌더링
+                <ReactPaginate
+                    previousLabel={'«'}
+                    nextLabel={'»'}
+                    breakLabel={'...'}
+                    breakClassName={'break-me'}
+                    pageCount={pageCount}
+                    marginPagesDisplayed={2}
+                    pageRangeDisplayed={5}
+                    onPageChange={handlePageClick}
+                    containerClassName={'pagination'}
+                    subContainerClassName={'pages pagination'}
+                    activeClassName={'active'}
+                    previousClassName={'page-item'}
+                    nextClassName={'page-item'}
+                    pageClassName={'page-item'}
+                    previousLinkClassName={'page-link'}
+                    nextLinkClassName={'page-link'}
+                    pageLinkClassName={'page-link'}
+                    breakLinkClassName={'page-link'}
+                    activeLinkClassName={'active'}
+                    disabledClassName={'disabled'}
+                    forcePage={page - 1} // 현재 페이지를 반영하기 위해 forcePage 사용
+                />
+            )}
         </div>
     );
 };
