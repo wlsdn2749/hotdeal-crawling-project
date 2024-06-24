@@ -18,6 +18,13 @@ const siteMapping = (site) => {
 };
 
 const HotDealItem = ({ item, onClick }) => {
+    const formatDate = (time) => {
+        const date = new Date(time);
+        const dateString = date.toLocaleDateString();
+        const timeString = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        return `${dateString} ${timeString}`;
+    };
+
     return (
         <div className="HotDealItem" onClick={onClick}>
             <div className="info">
@@ -29,7 +36,7 @@ const HotDealItem = ({ item, onClick }) => {
                     <div>추천수: {item.recommend}</div>
                     <div>댓글수: {item.comment}</div>
                     <div>사이트: {siteMapping(item.site)}</div>
-                    <div>등록일: {new Date(item.time).toLocaleDateString()}</div>
+                    <div>등록일: {formatDate(item.time)}</div>
                 </div>
             </div>
             <div className='price'>
