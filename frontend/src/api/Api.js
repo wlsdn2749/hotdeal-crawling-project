@@ -1,16 +1,22 @@
+// api.js
 import axios from 'axios';
 import qs from 'qs';  // qs 라이브러리 사용
 
 const API_URL = 'http://tools.gyu.be:8000/hotdeal';
 
+// 아이템 목록을 가져오는 함수
 export const fetchItems = async (page = 1, limit = 10, order = 'desc') => {
     try {
         const response = await axios.get(API_URL, {
             params: { page, count: limit, order }
         });
+        // 응답 헤더에서 총 개수 가져오기
+        const totalCount = response.headers['x-total-count'];
+        // console.log('헤더 열어보기', response.headers);
+        // console.log(totalCount);
         return {
             items: response.data,
-            total: 200 // 총 아이템 수를 임의로 200으로 설정
+            total: totalCount ? parseInt(totalCount, 10) : 200  // 총 아이템 수를 헤더에서 가져오거나 기본값 200으로 설정
         };
     } catch (error) {
         console.error('Error fetching items:', error);
@@ -34,7 +40,7 @@ export const detailItem = async (site, url) => {
     }
 };
 
-// 카테고리 및 정렬 방식으로 필터링된 아이템을 가져오는 함수 추가
+// 카테고리 및 정렬 방식으로 필터링된 아이템을 가져오는 함수
 export const fetchItemsByCategories = async (page = 1, limit = 10, categories = [], order = 'desc', sites = []) => {
     if (categories.length === 0 && sites.length === 0) {
         return await fetchItems(page, limit, order);
@@ -51,9 +57,11 @@ export const fetchItemsByCategories = async (page = 1, limit = 10, categories = 
             },
             paramsSerializer: params => qs.stringify(params, { arrayFormat: 'repeat' })  // qs 사용
         });
+        // 응답 헤더에서 총 개수 가져오기
+        const totalCount = response.headers['x-total-count'];
         return {
             items: response.data,
-            total: 200,
+            total: totalCount ? parseInt(totalCount, 10) : 200,  // 총 아이템 수를 헤더에서 가져오거나 기본값 200으로 설정
         };
     } catch (error) {
         console.error('Error fetching items by categories:', error);
@@ -61,7 +69,7 @@ export const fetchItemsByCategories = async (page = 1, limit = 10, categories = 
     }
 };
 
-// 검색어로 필터링된 아이템을 가져오는 함수 추가
+// 검색어로 필터링된 아이템을 가져오는 함수
 export const searchItems = async (page = 1, limit = 10, searchQuery = '', searchMode = 'title', order = 'desc') => {
     console.log('검색 구분', searchMode);
     console.log('검색한 단어', searchQuery);
@@ -75,9 +83,11 @@ export const searchItems = async (page = 1, limit = 10, searchQuery = '', search
                 order
             }
         });
+        // 응답 헤더에서 총 개수 가져오기
+        const totalCount = response.headers['x-total-count'];
         return {
             items: response.data,
-            total: 200, // 총 아이템 수를 임의로 200으로 설정
+            total: totalCount ? parseInt(totalCount, 10) : 200,  // 총 아이템 수를 헤더에서 가져오거나 기본값 200으로 설정
         };
     } catch (error) {
         console.error('Error searching items:', error);
