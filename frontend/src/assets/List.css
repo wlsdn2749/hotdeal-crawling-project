@@ -3,13 +3,11 @@
     flex-direction: column;
     gap: 20px;
     padding: 20px;
-    /* padding 추가 */
 }
 
 .List .search-container {
     display: flex;
     flex-wrap: wrap;
-    /* 요소들이 줄 바꿈되어 반응형으로 정렬되도록 설정 */
     justify-content: space-between;
     align-items: center;
     gap: 20px;
@@ -19,18 +17,17 @@
 .List .dropdown-container {
     display: flex;
     flex-wrap: wrap;
-    /* 요소들이 줄 바꿈되어 반응형으로 정렬되도록 설정 */
     gap: 10px;
-    /* 요소들 사이의 간격 설정 */
     flex: 1 1 auto;
-    /* 요소가 남은 공간을 채우도록 설정 */
 }
 
 .List .dropdown-container .react-select-container {
     min-width: 150px;
-    /* 드롭다운 최소 너비 설정 */
     flex: 1 1 150px;
-    /* 요소가 줄 바꿈 시 적절한 크기를 유지하도록 설정 */
+}
+
+.List .react-select-container.items-per-page-dropdown {
+    min-width: 200px;
 }
 
 .List>input {
@@ -56,15 +53,10 @@
     align-items: center;
     justify-content: center;
     padding: 0 12px;
-    /* 버튼 패딩 설정 */
     height: 38px;
-    /* 버튼 높이 설정 */
     font-size: 16px;
-    /* 텍스트 크기 설정 */
     width: auto;
-    /* 버튼 너비를 자동으로 설정 */
     white-space: nowrap;
-    /* 텍스트가 줄 바꿈되지 않도록 설정 */
 }
 
 .pagination {
@@ -100,22 +92,14 @@
     display: flex;
     align-items: center;
     flex-wrap: wrap;
-    /* 요소들이 줄 바꿈되어 반응형으로 정렬되도록 설정 */
     gap: 10px;
-    /* 요소들 사이의 간격 설정 */
 }
 
 .order-dropdown {
     margin-left: 10px;
     min-width: 150px;
-    /* 드롭다운 최소 너비 설정 */
-    flex: 1 1 150px;
-    /* 요소가 줄 바꿈 시 적절한 크기를 유지하도록 설정 */
 }
 
 .search-mode-dropdown {
     min-width: 150px;
-    /* 드롭다운 최소 너비 설정 */
-    flex: 1 1 150px;
-    /* 요소가 줄 바꿈 시 적절한 크기를 유지하도록 설정 */
 }
