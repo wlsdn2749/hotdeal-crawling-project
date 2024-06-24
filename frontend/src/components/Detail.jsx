@@ -27,6 +27,16 @@ const Detail = () => {
         getItem();
     }, [site, url]);
 
+    const formatDate = (timestamp) => {
+        const date = new Date(timestamp);
+        const year = date.getFullYear();
+        const month = ('0' + (date.getMonth() + 1)).slice(-2);
+        const day = ('0' + date.getDate()).slice(-2);
+        const hours = ('0' + date.getHours()).slice(-2);
+        const minutes = ('0' + date.getMinutes()).slice(-2);
+        return `${year}-${month}-${day} ${hours}:${minutes}`;
+    };
+
     if (loading) {
         return <div className="loading">Loading...</div>;
     }
@@ -42,7 +52,7 @@ const Detail = () => {
                 <div className="detail-meta">
                     <span className="author">작성자: {item.author}</span>
                     <span className="date">
-                        {item.date ? new Date(item.date).toLocaleDateString() : '날짜 없음'}
+                        {item.date ? `등록일 : ${formatDate(item.date)}` : '날짜 없음'}
                     </span>
                 </div>
             </div>
@@ -89,7 +99,7 @@ const Detail = () => {
                             <div key={index} className="comment">
                                 <div className="comment-meta">
                                     <span className="comment-author">{comment.author}</span>
-                                    <span className="comment-date">{new Date(comment.date).toLocaleString()}</span>
+                                    <span className="comment-date">{formatDate(comment.date)}</span>
                                 </div>
                                 <p className="comment-content">{comment.content}</p>
                             </div>
