@@ -2,6 +2,21 @@
 import React from 'react';
 import '../assets/HotDealItem.css';
 
+const siteMapping = (site) => {
+    switch (site) {
+        case 'fm':
+            return '에펨코리아';
+        case 'qz':
+            return '퀘이사존';
+        case 'ruli':
+            return '루리웹';
+        case 'arca':
+            return '아카라이브';
+        default:
+            return site;
+    }
+};
+
 const HotDealItem = ({ item, onClick }) => {
     return (
         <div className="HotDealItem" onClick={onClick}>
@@ -13,7 +28,7 @@ const HotDealItem = ({ item, onClick }) => {
                     <div>카테고리: {item.category}</div>
                     <div>추천수: {item.recommend}</div>
                     <div>댓글수: {item.comment}</div>
-                    <div>사이트: {item.site}</div>
+                    <div>사이트: {siteMapping(item.site)}</div>
                     <div>등록일: {new Date(item.time).toLocaleDateString()}</div>
                 </div>
             </div>

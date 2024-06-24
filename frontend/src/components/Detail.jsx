@@ -14,12 +14,9 @@ const Detail = () => {
         const getItem = async () => {
             setLoading(true);
             try {
-
-                const { item } = await detailItem(site, url);
-                console.log('detail에서 가져온 item', item);
-
-
-                setItem(item);
+                const data = await detailItem(site, url);
+                console.log('detail에서 가져온 item', data);
+                setItem(data.item);
                 setLoading(false);
             } catch (error) {
                 setError(error);
@@ -44,7 +41,9 @@ const Detail = () => {
                 <h1 className="detail-title">{item.title}</h1>
                 <div className="detail-meta">
                     <span className="author">작성자: {item.author}</span>
-                    <span className="date">{item.date}</span>
+                    <span className="date">
+                        {item.date ? new Date(item.date).toLocaleDateString() : '날짜 없음'}
+                    </span>
                 </div>
             </div>
             <div className="detail-body">
@@ -78,14 +77,26 @@ const Detail = () => {
                     </tbody>
                 </table>
                 <div className="detail-article">
-                    {(item.article ?? []).map((paragraph, index) => (
+                    {(item.article ?? '').split(',').map((paragraph, index) => (
                         <p key={index}>{paragraph}</p>
                     ))}
                 </div>
 
                 <div className="detail-comments">
                     <h2>댓글</h2>
-                    <p>{item.comments}</p>
+                    {Array.isArray(item.comments) && item.comments.length > 0 ? (
+                        item.comments.map((comment, index) => (
+                            <div key={index} className="comment">
+                                <div className="comment-meta">
+                                    <span className="comment-author">{comment.author}</span>
+                                    <span className="comment-date">{new Date(comment.date).toLocaleString()}</span>
+                                </div>
+                                <p className="comment-content">{comment.content}</p>
+                            </div>
+                        ))
+                    ) : (
+                        <p>댓글이 없습니다.</p>
+                    )}
                 </div>
             </div>
         </div>
