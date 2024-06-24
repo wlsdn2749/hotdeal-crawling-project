@@ -18,8 +18,8 @@ class QzBoardSpider(scrapy.Spider):
                 'overwrite': True,
             },
         },
-        'CONCURRENT_REQUESTS': 16,
-        'DOWNLOAD_DELAY': 1,
+        'CONCURRENT_REQUESTS': 8,
+        'DOWNLOAD_DELAY': 2,
         'LOG_ENABLED': False
     }
     
