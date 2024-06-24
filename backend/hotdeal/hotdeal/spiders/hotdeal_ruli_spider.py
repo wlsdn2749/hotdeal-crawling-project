@@ -6,14 +6,25 @@ class RuliSpider(scrapy.Spider):
     custom_settings = {
         'ITEM_PIPELINES': {
             "hotdeal.pipelines.HotdealPipeline": 300,
-        }
+        },
+        'FEEDS': {
+            '/workspace/hotdeal-crawling-project/backend/app/static/ruli_hotdeal.csv': {
+                'format': 'csv',
+                'encoding': 'utf-8',
+                'overwrite': True,
+            },
+        },
+        'CONCURRENT_REQUESTS': 16,
+        'DOWNLOAD_DELAY': 1,
+        'LOG_ENABLED': False
     }
     def __init__(self):
         self.site = "ruli"
         
     def start_requests(self):
+        print(f"Crawl Start {self.site} ")
         urls = [
-            f"https://bbs.ruliweb.com/market/board/1020?page={idx}" for idx in range(1, 11)
+            f"https://bbs.ruliweb.com/market/board/1020?page={idx}" for idx in range(1, 6)
         ]
         
         for url in urls:

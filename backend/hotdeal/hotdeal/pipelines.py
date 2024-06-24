@@ -67,21 +67,26 @@ class HotdealPipeline:
             item['url'] = "https://quasarzone.com" + item['url']
             item['time'] = convert_to_datetime(item['time'].strip())
             item['views'] = item['views'].strip()
-            item['shoppingmall'] = re.search(r'\[(.*?)\]', item['title']).group(1)  
             
-            match = re.search(r'\[(.*?)\]', item['shoppingmall'])
+            match = re.search(r'\[(.*?)\]', item['title'])
             if match:
                 item['shoppingmall'] = match.group(1) if match.group(1) else "기타 쇼핑몰"
             else:
                 item['shoppingmall'] = "기타 쇼핑몰"
         
         elif item['site'] == 'ruli':
-            item['shoppingmall'] = re.search(r'\[(.*?)\]', item['title']).group(1)
+        
             item['time'] = convert_to_datetime(item['time'].strip())
             item['views'] = item['views'].strip()
             item['author'] = item['author'].strip()
             item['price'] = "가격 미제공"
             item['deliveryfee'] = "배송료 미제공"
+            
+            match = re.search(r'\[(.*?)\]', item['title'])
+            if match:
+                item['shoppingmall'] = match.group(1) if match.group(1) else "기타 쇼핑몰"
+            else:
+                item['shoppingmall'] = "기타 쇼핑몰"
             
         # title 필드 처리
         
@@ -107,10 +112,10 @@ class HotdealDetailPipeline:
             item['article'] = ""
         
         item['title'] = item['title'].strip()
-        item['price'] = item['price'].strip()
-        item['deliveryfee'] = item['deliveryfee'].strip()
+        item['price'] = str(item['price']).strip()
+        item['deliveryfee'] = str(item['deliveryfee']).strip()
         item['product_name'] = item['product_name'].strip()
-        item['likes'] = item['likes'].strip()
+        item['likes'] = str(item['likes']).strip()
         item['author'] = item['author'].strip()
         
         
@@ -119,11 +124,16 @@ class HotdealDetailPipeline:
                 comments['content'] = [content.strip() for content in comments['content']]
                 comments['date'] = convert_to_datetime_detail(comments['date'].replace(" ", "")) 
                 comments['author'] = comments['author'].strip()          
+                
+            item['date'] = convert_to_datetime(item['date'])
+            
         elif item['site'] == "arca":
             for comments in item['comments']:
                 comments['content'] = comments['content'].strip() if comments['content'] is not None else "Blank"
                 comments['author'] = comments['author'].strip()
                 comments['date'] = ArcaUtils.convert_iso_to_str(comments['date'].replace(" ", ""))         
+                
+            item['date'] = ArcaUtils.convert_fromisoformat(item['date'])
         elif item['site'] == "qz":
             # for comments in item['comments']: #TODO 지금 구현 안됨
             #     comments['content'] = comments['content'].strip() if comments['content'] is not None else "Blank"
@@ -131,10 +141,11 @@ class HotdealDetailPipeline:
             
             item['date'] = QzUtils.convert_timeformat(item['date'])
             item['product_name'] = QzUtils.extract_product_name(item['title'])
+            
         elif item['site'] == "ruli":
             for comments in item['comments']:
                 comments['content'] = comments['content'].strip() if comments['content'] is not None else "Blank"
-                comments['author'] = comments['author'].strip()
+                comments['author'] = comments['author'].strip() if comments['author'] is not None else "익명"
                 comments['date'] = convert_to_datetime(comments['date'].strip())
             
             item['date'] = RuliUtils.convert_timeformat(item['date'])

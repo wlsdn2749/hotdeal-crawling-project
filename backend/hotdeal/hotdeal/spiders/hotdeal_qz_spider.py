@@ -1,19 +1,29 @@
 import scrapy
 
-
 class QzSpider(scrapy.Spider):
     name = "qz_hotdeal"
     custom_settings = {
         'ITEM_PIPELINES': {
             "hotdeal.pipelines.HotdealPipeline": 300,
-        }
+        },
+        'FEEDS': {
+            '/workspace/hotdeal-crawling-project/backend/app/static/qz_hotdeal.csv': {
+                'format': 'csv',
+                'encoding': 'utf-8',
+                'overwrite': True,
+            },
+        },
+        'CONCURRENT_REQUESTS': 16,
+        'DOWNLOAD_DELAY': 1,
+        'LOG_ENABLED': False
     }
     def __init__(self):
         self.site = "qz"
         
     def start_requests(self):
+        print(f"Crawl Start {self.site} ")
         urls = [
-            f'https://quasarzone.com/bbs/qb_saleinfo?page={idx}' for idx in range(1, 11)
+            f'https://quasarzone.com/bbs/qb_saleinfo?page={idx}' for idx in range(1, 6)
         ]
         
         for url in urls:
@@ -42,4 +52,3 @@ class QzSpider(scrapy.Spider):
                 "author": market_info_sub.xpath(".//span[contains(@class, 'user-nick-wrap nick')]/@data-nick").get() ,
                 "views": market_info_sub.xpath(".//span[contains(@class, 'count')]/text()").get()
             }
-        

@@ -3,12 +3,24 @@ from typing import Iterable
 import scrapy
 import duckdb
 
+FEED_PATH = '/workspace/hotdeal-crawling-project/backend/app/static'
+
 class QzBoardSpider(scrapy.Spider):
     name = "qz_hotdeal_board" # Spider 식별자, Unique 해야함
     custom_settings = {
         'ITEM_PIPELINES': {
             "hotdeal.pipelines.HotdealDetailPipeline": 300,
-        }
+        },
+        'FEEDS': {
+            f'{FEED_PATH}/qz_hotdeal_board.csv': {
+                'format': 'csv',
+                'encoding': 'utf-8',
+                'overwrite': True,
+            },
+        },
+        'CONCURRENT_REQUESTS': 16,
+        'DOWNLOAD_DELAY': 1,
+        'LOG_ENABLED': False
     }
     
     def __init__(self):
@@ -18,10 +30,10 @@ class QzBoardSpider(scrapy.Spider):
     
     def get_urls(self):
     
-        self.conn.execute("CREATE TABLE fm AS SELECT * FROM read_csv_auto('./qz_hotdeal.csv')")
+        self.conn.execute(f"CREATE TABLE qz AS SELECT * FROM read_csv_auto('{FEED_PATH}/qz_hotdeal.csv')")
         query = f"""
             SELECT url
-            FROM fm
+            FROM qz
         """
         
         result = self.conn.execute(query).fetchall()
@@ -30,12 +42,11 @@ class QzBoardSpider(scrapy.Spider):
         return urls
         
     def start_requests(self):
-        urls = [
-            "https://quasarzone.com/bbs/qb_saleinfo/views/1616822",
-            
-        ]
+        # urls = [
+        #     "https://quasarzone.com/bbs/qb_saleinfo/views/1616822",
+        # ]
         
-        # urls = self.urls
+        urls = self.urls
         for url in urls:
             yield scrapy.Request(url=url, callback=self.parse) 
             # url에 요청날려~
@@ -71,15 +82,14 @@ class QzBoardSpider(scrapy.Spider):
             "title": top.xpath(".//h1[contains(@class, 'title')]/text()[last()]").get(), # TODO strip()
             "date": top_util.xpath(".//span[contains(@class, 'date')]/text()").get(), # %y.%m.%d %H:%M,
             "author": top_util.xpath(".//div[contains(@class, 'user-nick-wrap user')]/@data-nick").get(), #!NEED : Prefix Remove
-            "price": table.xpath("./tr[3]//span/text()[last()]").get(),
-            "deliveryfee": table.xpath("./tr[4]/td/text()").get(),
             "views":  top_util.xpath(".//span[contains(@class, 'count')]//em[contains(@class, 'view')]/text()").get(),
             "likes": top.xpath(".//span[contains(@id, 'boardGoodCount')]/text()").get(), # TODO strip()
             "comment_count" : top_util.xpath(".//span[contains(@class, 'count')]//em[contains(@class, 'reply')]/text()").get(),
-            
             "related_url": table.xpath("./tr[1]//a/text()").get(),
             "shoppingmall": table.xpath("./tr[2]//td/text()[last()]").get(), # TODO strip()
             "product_name": "lazy", # TODO strip(), remove '/' 
-            "article": response.xpath(".//textarea[contains(@id, 'org_contents')]/p/text()").getall() , 
+            "price": table.xpath("./tr[3]//span/text()[last()]").get(),            
+            "deliveryfee": table.xpath("./tr[4]/td/text()").get(),
+            "article": response.xpath(".//textarea[contains(@id, 'org_contents')]/p/text()").getall(), 
             "comments": comments_lst # JS로 댓글을 Load함으로 지금 현재 미구현
         }

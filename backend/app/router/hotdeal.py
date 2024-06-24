@@ -1,7 +1,7 @@
 import pickle
 import base64
 
-from fastapi import APIRouter, Depends, Query, HTTPException
+from fastapi import APIRouter, Depends, Query, HTTPException, Response
 from typing import Optional, List, Annotated, Literal
 from pydantic import Field, field_validator, BaseModel, ValidationInfo
 from app.database import db
@@ -99,14 +99,13 @@ class SearchParameters(BaseModel):
         return v
     
 @hotdeal.get('/', tags=['hotdeal'], response_model=List[Item])
-async def read_items(itemlist: ItemList = Depends()):
+async def read_items(response: Response, itemlist: ItemList = Depends()):
     
     categories = itemlist.categories
     page = itemlist.page
     count = itemlist.count
     order = itemlist.order
     sites = itemlist.sites
-    
     
     conn = db.get_connection()
     columns = list(Item.model_fields)
@@ -116,6 +115,11 @@ async def read_items(itemlist: ItemList = Depends()):
         FROM merged
     """
 
+    page_query = f"""
+        SELECT COUNT(*)
+        FROM merged
+    """
+    
     optional_query = []
     query_parameters = []
     
@@ -133,12 +137,17 @@ async def read_items(itemlist: ItemList = Depends()):
         
     if optional_query:
         query += " WHERE " + " AND ".join(optional_query)
-        
+        page_query += " WHERE " + " AND ".join(optional_query)
+    
     query += f"ORDER BY time {order} OFFSET {(page-1)*count} LIMIT {count}"
     
     result = conn.execute(query, query_parameters).fetchall()
 
+    if not result:
+        raise HTTPException(status_code=400, detail="결과가 없습니다.")
     items: List[Item] = [Item(**dict(zip(columns,item))) for item in result]
+    
+    response.headers["X-Total-Count"] = str(conn.execute(page_query, query_parameters).fetchone()[0])
     return items
 
 @hotdeal.get('/detail', tags=['hotdeal'], response_model = HotdealItemDetail)
@@ -168,12 +177,15 @@ async def read_item_detail(site: str = "fm", url: str = "https://www.fmkorea.com
     
     result = conn.execute(query).fetchone()
     
+    if not result:
+        raise HTTPException(status_code=404, detail="상세 페이지가 없습니다.")
+    
     detail: HotdealItemDetail = dict(zip(colmuns, result))
     detail["comments"] = pickle.loads(base64.b64decode(detail["comments"].encode('utf-8')))
     return detail
 
 @hotdeal.get('/search', tags=['hotdeal'], response_model= List[Item])
-async def search(p: SearchParameters = Depends()):
+async def search(response: Response, p: SearchParameters = Depends()):
     
     conn = db.get_connection()
     
@@ -183,26 +195,46 @@ async def search(p: SearchParameters = Depends()):
     search_query = p.search_query
     order = p.order
     
-    
     columns = list(Item.model_fields)
     
     if search_mode == 'title_content':     
         query = f"""
             SELECT DISTINCT merged.*
-            FROM fm
+            FROM merged
             WHERE merged.url IN (
                 SELECT url
                 FROM merged_detail
                 WHERE article LIKE '%{search_query}%'
                 UNION
                 SELECT url
-                FROM merged_detail
+                FROM merged
                 WHERE title LIKE '%{search_query}%'
             )
-        """             
+        """
+        
+        count_query = f"""
+            SELECT DISTINCT COUNT(merged.*)
+            FROM merged
+            WHERE merged.url IN (
+                SELECT url
+                FROM merged_detail
+                WHERE article LIKE '%{search_query}%'
+                UNION
+                SELECT url
+                FROM merged
+                WHERE title LIKE '%{search_query}%'
+            )
+        """
+        
     elif search_mode == 'title':
         query = f"""
             SELECT DISTINCT *
+            FROM merged
+            WHERE title LIKE '%{search_query}%'
+        """
+        
+        count_query = f"""
+            SELECT DISTINCT COUNT(*)
             FROM merged
             WHERE title LIKE '%{search_query}%'
         """
@@ -211,4 +243,6 @@ async def search(p: SearchParameters = Depends()):
     
     result = conn.execute(query).fetchall()
     search_items: List[Item] = [Item(**dict(zip(columns,item))) for item in result]
+    
+    response.headers["X-Total-Count"] = str(conn.execute(count_query).fetchone()[0])
     return search_items

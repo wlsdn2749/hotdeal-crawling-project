@@ -6,14 +6,25 @@ class ArcaSpider(scrapy.Spider):
     custom_settings = {
         'ITEM_PIPELINES': {
             "hotdeal.pipelines.HotdealPipeline": 300,
-        }
+        },
+        'FEEDS': {
+            '/workspace/hotdeal-crawling-project/backend/app/static/arca_hotdeal.csv': {
+                'format': 'csv',
+                'encoding': 'utf-8',
+                'overwrite': True,
+            },
+        },
+        'CONCURRENT_REQUESTS': 16,
+        'DOWNLOAD_DELAY': 1,
+        'LOG_ENABLED': False
     }
     def __init__(self):
         self.site = "arca"
         
     def start_requests(self):
+        print(f"Crawl Start {self.site} ")
         urls = [
-            f'https://arca.live/b/hotdeal?p={idx}' for idx in range(1, 11)
+            f'https://arca.live/b/hotdeal?p={idx}' for idx in range(1, 6)
         ]
         
         for url in urls:

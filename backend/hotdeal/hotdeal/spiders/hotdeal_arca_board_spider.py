@@ -3,12 +3,24 @@ from typing import Iterable
 import scrapy
 import duckdb
 
+FEED_PATH = '/workspace/hotdeal-crawling-project/backend/app/static'
+
 class ArcaBoardSpider(scrapy.Spider):
     name = "arca_hotdeal_board" # Spider 식별자, Unique 해야함
     custom_settings = {
         'ITEM_PIPELINES': {
             "hotdeal.pipelines.HotdealDetailPipeline": 300,
-        }
+        },
+        'FEEDS': {
+            f'{FEED_PATH}/arca_hotdeal_board.csv': {
+                'format': 'csv',
+                'encoding': 'utf-8',
+                'overwrite': True,
+            },
+        },
+        'CONCURRENT_REQUESTS': 16,
+        'DOWNLOAD_DELAY': 1,
+        'LOG_ENABLED': False
     }
     
     def __init__(self):
@@ -18,10 +30,10 @@ class ArcaBoardSpider(scrapy.Spider):
     
     def get_urls(self):
     
-        self.conn.execute("CREATE TABLE fm AS SELECT * FROM read_csv_auto('./arca_hotdeal.csv')")
+        self.conn.execute(f"CREATE TABLE arca AS SELECT * FROM read_csv_auto('{FEED_PATH}/arca_hotdeal.csv')")
         query = f"""
             SELECT url
-            FROM fm
+            FROM arca
         """
         
         result = self.conn.execute(query).fetchall()
@@ -30,12 +42,12 @@ class ArcaBoardSpider(scrapy.Spider):
         return urls
         
     def start_requests(self):
-        urls = [
-            "https://arca.live/b/hotdeal/109073306?p=1",
-            "https://arca.live/b/hotdeal/109073064?p=1"
-        ]
+        # urls = [
+        #     "https://arca.live/b/hotdeal/109073306?p=1",
+        #     "https://arca.live/b/hotdeal/109073064?p=1"
+        # ]
         
-        # urls = self.urls
+        urls = self.urls
         for url in urls:
             yield scrapy.Request(url=url, callback=self.parse) 
             # url에 요청날려~

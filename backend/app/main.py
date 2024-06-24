@@ -4,7 +4,29 @@ from fastapi import FastAPI
 from app.router.hotdeal import hotdeal
 from fastapi.middleware.cors import CORSMiddleware
 
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from apscheduler.triggers.interval import IntervalTrigger
+from app.database import db
+import asyncio
+
 app = FastAPI()
+
+# 주기적으로 실행할 함수
+async def periodic_task():
+    db.update()
+
+# 스케줄러 설정
+scheduler = AsyncIOScheduler()
+scheduler.add_job(periodic_task, IntervalTrigger(minutes=20))  # n은 원하는 분 간격
+
+@app.on_event("startup")
+async def startup_event():
+    scheduler.start()
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    scheduler.shutdown()
+    
 
 origins = [
     "*"

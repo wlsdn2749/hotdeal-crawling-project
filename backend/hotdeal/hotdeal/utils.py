@@ -1,6 +1,9 @@
 from datetime import datetime, timedelta
 import json
+import os
 import re
+
+DIR_PATH = os.path.normpath(os.path.dirname(os.path.abspath(__file__)))
 
 def convert_to_datetime(input_str):
     try:
@@ -76,12 +79,16 @@ class ArcaUtils:
         formatted_string = datetime_obj.strftime('%Y-%m-%d %H:%M')
         
         return formatted_string
+    
+    @staticmethod
+    def convert_fromisoformat(date_string):
+        return datetime.fromisoformat(date_string.replace('Z', '+00:00'))
 
 class DataUtils:
     
     @staticmethod
     def get_site_category(site):
-        with open(f"./hotdeal/static/categories_{site}.json", 'r', encoding='utf-8') as f:
+        with open(f"{DIR_PATH}/static/categories_{site}.json", 'r', encoding='utf-8') as f:
             return json.load(f)
         
     @staticmethod
