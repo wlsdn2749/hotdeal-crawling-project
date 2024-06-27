@@ -85,15 +85,29 @@ class ArcaUtils:
         return datetime.fromisoformat(date_string.replace('Z', '+00:00'))
 
 class DataUtils:
-    
+    @staticmethod
+    def find_root_dir(path):
+        while True:
+            parent = os.path.dirname(path)
+            if parent == path:
+                return path
+            path = parent
+        
     @staticmethod
     def get_site_category(site):
         with open(f"{DIR_PATH}/static/categories_{site}.json", 'r', encoding='utf-8') as f:
             return json.load(f)
         
     @staticmethod
-    def remove_parentheses(str):
-        return str.replace("[", "").replace("]", "")
+    def remove_parentheses(content):
+        if not isinstance(content, str):
+            try:
+                content = str(content)
+            except:
+                return "0"
+        
+            
+        return content.replace("[", "").replace("]", "")
         
 class QzUtils:
     
