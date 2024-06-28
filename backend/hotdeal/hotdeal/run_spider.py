@@ -17,6 +17,10 @@ from spiders.hotdeal_qz_board_spider import QzBoardSpider
 from spiders.hotdeal_arca_board_spider import ArcaBoardSpider
 from spiders.hotdeal_ruli_board_spider import RuliBoardSpider
 
+# Twisted 리액터 명시적 설정
+from twisted.internet import asyncioreactor
+asyncioreactor.install()
+
 # 로깅 설정
 logging.basicConfig(
     level=logging.INFO,

@@ -143,12 +143,13 @@ class HotdealDetailPipeline:
             item['product_name'] = QzUtils.extract_product_name(item['title'])
             
         elif item['site'] == "ruli":
+            item['date'] = RuliUtils.convert_timeformat(item['date'])
+            
             for comments in item['comments']:
                 comments['content'] = comments['content'].strip() if comments['content'] is not None else "Blank"
                 comments['author'] = comments['author'].strip() if comments['author'] is not None else "익명"
-                comments['date'] = convert_to_datetime(comments['date'].strip())
-            
-            item['date'] = RuliUtils.convert_timeformat(item['date'])
+                comments['date'] = convert_to_datetime(comments['date'].strip()) if comments['date'] is not None else item['date']
+
             item['price'] = '가격 미제공'
             item['deliveryfee'] = '배송비 미제공'
         

@@ -1,5 +1,11 @@
 import scrapy
+import os
+import sys
 
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from utils import DataUtils
+
+PROJECT_ROOT_PATH = DataUtils.get_current_development()
 class QzSpider(scrapy.Spider):
     name = "qz_hotdeal"
     custom_settings = {
@@ -7,7 +13,7 @@ class QzSpider(scrapy.Spider):
             "hotdeal.pipelines.HotdealPipeline": 300,
         },
         'FEEDS': {
-            '/workspace/hotdeal-crawling-project/backend/app/static/qz_hotdeal.csv': {
+            f'{PROJECT_ROOT_PATH}/app/static/qz_hotdeal.csv': {
                 'format': 'csv',
                 'encoding': 'utf-8',
                 'overwrite': True,

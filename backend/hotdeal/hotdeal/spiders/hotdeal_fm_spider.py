@@ -1,6 +1,13 @@
 from pathlib import Path
 from typing import Iterable
 import scrapy
+import os
+import sys
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from utils import DataUtils
+
+PROJECT_ROOT_PATH = DataUtils.get_current_development()
 
 class QuoteSpider(scrapy.Spider):
     name = "fm_hotdeal" # Spider 식별자, Unique 해야함
