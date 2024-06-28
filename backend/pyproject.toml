@@ -13,6 +13,7 @@ duckdb = "^1.0.0"
 fastapi = "^0.111.0"
 uvicorn = {extras = ["standard"], version = "^0.30.1"}
 apscheduler = "^3.10.4"
+python-dotenv = "^1.0.1"
 
 
 [build-system]
