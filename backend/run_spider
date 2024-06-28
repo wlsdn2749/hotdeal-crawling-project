@@ -1,6 +1,4 @@
-SHELL=/bin/bash
+SHELL=/bin/sh
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 
-*/20 * * * *	/backend/.venv/bin/python /backend/hotdeal/hotdeal/run_spider.py >> /var/log/spiders/spider_activity.log 2>&1
-*/1 * * * *	echo 'cron working!' >> ~/test-cron1.txt
-
+*/20 * * * *	root	/backend/.venv/bin/python /backend/hotdeal/hotdeal/run_spider.py >> /var/log/spiders/spider_activity.log 2>&1
