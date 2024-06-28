@@ -1,5 +1,11 @@
 import scrapy
+import os
+import sys
 
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from utils import DataUtils
+
+PROJECT_ROOT_PATH = DataUtils.get_current_development()
 
 class RuliSpider(scrapy.Spider):
     name = "ruli_hotdeal"
@@ -8,7 +14,7 @@ class RuliSpider(scrapy.Spider):
             "hotdeal.pipelines.HotdealPipeline": 300,
         },
         'FEEDS': {
-            '/workspace/hotdeal-crawling-project/backend/app/static/ruli_hotdeal.csv': {
+            f'{PROJECT_ROOT_PATH}/app/static/ruli_hotdeal.csv': {
                 'format': 'csv',
                 'encoding': 'utf-8',
                 'overwrite': True,

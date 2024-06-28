@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 import json
 import os
 import re
+import pytz
 
 DIR_PATH = os.path.normpath(os.path.dirname(os.path.abspath(__file__)))
 
@@ -72,11 +73,16 @@ class FmUtils:
 class ArcaUtils:
     @staticmethod
     def convert_iso_to_str(iso_string):
-        # 문자열을 datetime 객체로 변환
+        # ISO 문자열을 datetime 객체로 변환 (UTC 가정)
         datetime_obj = datetime.strptime(iso_string, '%Y-%m-%dT%H:%M:%S.%fZ')
+        datetime_obj = datetime_obj.replace(tzinfo=pytz.UTC)
+        
+        # UTC를 KST로 변환
+        kst = pytz.timezone('Asia/Seoul')
+        kst_datetime = datetime_obj.astimezone(kst)
         
         # 원하는 형식으로 변환
-        formatted_string = datetime_obj.strftime('%Y-%m-%d %H:%M')
+        formatted_string = kst_datetime.strftime('%Y-%m-%d %H:%M')
         
         return formatted_string
     
@@ -86,12 +92,8 @@ class ArcaUtils:
 
 class DataUtils:
     @staticmethod
-    def find_root_dir(path):
-        while True:
-            parent = os.path.dirname(path)
-            if parent == path:
-                return path
-            path = parent
+    def get_current_development():
+        return os.path.normpath(os.path.dirname(os.path.dirname(DIR_PATH)))
         
     @staticmethod
     def get_site_category(site):

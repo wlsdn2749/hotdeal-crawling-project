@@ -2,6 +2,15 @@ from pathlib import Path
 from typing import Iterable
 import scrapy
 import duckdb
+import os
+import sys
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from utils import DataUtils
+
+PROJECT_ROOT_PATH = DataUtils.get_current_development()
+
+FEED_PATH = f'{PROJECT_ROOT_PATH}/app/static'
 
 class QuoteSpider(scrapy.Spider):
     name = "fm_hotdeal_board" # Spider 식별자, Unique 해야함
