@@ -178,7 +178,7 @@ async def read_item_detail(site: str = "fm", url: str = "https://www.fmkorea.com
     result = conn.execute(query).fetchone()
     
     if not result:
-        raise HTTPException(status_code=404, detail="상세 페이지가 없습니다.")
+        raise HTTPException(status_code=404, detail=url)
     
     detail: HotdealItemDetail = dict(zip(colmuns, result))
     detail["comments"] = pickle.loads(base64.b64decode(detail["comments"].encode('utf-8')))
