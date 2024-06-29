@@ -45,6 +45,7 @@
 .List .wrapper {
     display: flex;
     flex-direction: column;
+    cursor: pointer;
     gap: 20px;
 }
 
@@ -102,4 +103,29 @@
 
 .search-mode-dropdown {
     min-width: 150px;
+}
+
+.List .searchForm {
+    display: flex;
+    justify-content: center;
+    /* 중앙 정렬 */
+    align-items: center;
+    /* 세로축 중앙 정렬 */
+
+    /* 상단 여백 추가 */
+    width: 80%;
+    /* 너비를 80%로 설정 */
+    margin-left: auto;
+    /* 자동 마진으로 중앙 위치 */
+    margin-right: auto;
+    /* 자동 마진으로 중앙 위치 */
+
+    margin-bottom: 100px;
+}
+
+.List .searchForm .d-flex {
+    width: 55%;
+    /* flex 컨테이너의 너비를 100%로 설정 */
+    justify-content: space-between;
+    /* 요소들 사이에 공간을 균등하게 배분 */
 }

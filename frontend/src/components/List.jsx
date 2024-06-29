@@ -56,7 +56,7 @@ const List = () => {
     const [selectedSites, setSelectedSites] = useState([]);
     const [order, setOrder] = useState(orderOptions[0]); // 기본 정렬을 최신순으로 설정
     const [searchQuery, setSearchQuery] = useState(''); // 검색어 상태 변수
-    const [searchMode, setSearchMode] = useState(searchModeOptions[0]); // 검색 모드 상태 변수
+    const [searchMode, setSearchMode] = useState(searchModeOptions[1]); // 검색 모드 상태 변수
     const [itemsPerPage, setItemsPerPage] = useState(() => {
         // localStorage에서 itemsPerPage 값을 불러오거나 기본값으로 10을 사용
         const saved = localStorage.getItem('itemsPerPage');
@@ -204,20 +204,6 @@ const List = () => {
                         />
                     </div>
                 </div>
-
-                <form className="d-flex" onSubmit={handleSearchSubmit}>
-                    <div className="react-select-container search-mode-dropdown">
-                        <Select
-                            options={searchModeOptions}
-                            value={searchMode}
-                            onChange={handleSearchModeChange}
-                            placeholder="검색 모드 선택"
-                            closeMenuOnSelect={true}
-                        />
-                    </div>
-                    <input className="form-control me-2" type="search" placeholder="Search" aria-label="Search" value={searchQuery} onChange={handleSearchChange} /> {/* 검색어 입력 */}
-                    <button className="btn btn-outline-success" type="submit">검색</button> {/* 검색 버튼 */}
-                </form>
             </div>
 
             {loading ? (
@@ -226,6 +212,8 @@ const List = () => {
                 <div className="no-matches">{error.message}</div>
             ) : error ? (
                 <div>Error: {error.message}</div>
+
+
             ) : (
                 <div className="wrapper">
                     {items.map((item, index) => (
@@ -259,6 +247,23 @@ const List = () => {
                     forcePage={page - 1} // 현재 페이지를 반영하기 위해 forcePage 사용
                 />
             )}
+
+            <div className='searchForm'>
+                <form className="d-flex" onSubmit={handleSearchSubmit}>
+                    <div className="react-select-container search-mode-dropdown">
+                        <Select
+                            options={searchModeOptions}
+                            value={searchMode}
+                            onChange={handleSearchModeChange}
+                            placeholder="검색 모드 선택"
+                            closeMenuOnSelect={true}
+                        />
+                    </div>
+                    <input className="form-control me-2" type="search" placeholder="Search" aria-label="Search" value={searchQuery} onChange={handleSearchChange} /> {/* 검색어 입력 */}
+                    <button className="btn btn-outline-success" type="submit">검색</button> {/* 검색 버튼 */}
+                </form>
+            </div>
+
         </div>
     );
 };

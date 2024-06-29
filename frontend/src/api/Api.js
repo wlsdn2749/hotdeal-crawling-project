@@ -5,7 +5,7 @@ import qs from 'qs';  // qs 라이브러리 사용
 const API_URL = 'http://tools.gyu.be:8000/hotdeal';
 
 // 아이템 목록을 가져오는 함수
-export const fetchItems = async (page = 1, limit = 10, order = 'desc') => {
+export const fetchItems = async (page = 1, limit = 20, order = 'desc') => {
     try {
         const response = await axios.get(API_URL, {
             params: { page, count: limit, order }
@@ -35,6 +35,11 @@ export const detailItem = async (site, url) => {
             item: response.data,
         };
     } catch (error) {
+        if (error.response && error.response.status === 404) {
+            // 404 에러가 발생하면 새로운 창을 열어 매개변수 url 경로로 이동시킴
+            window.open(url, '_blank');
+            return; // 추가적인 처리가 없도록 리턴
+        }
         console.error('Error fetching item:', error);
         throw error;
     }
