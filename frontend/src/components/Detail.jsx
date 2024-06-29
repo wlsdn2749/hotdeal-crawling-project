@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { detailItem } from '../api/Api';
 import '../assets/Detail.css';
 
@@ -9,7 +9,7 @@ const Detail = () => {
     const [item, setItem] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-
+    const navigate = useNavigate();
     useEffect(() => {
         const getItem = async () => {
             setLoading(true);
@@ -19,13 +19,19 @@ const Detail = () => {
                 setItem(data.item);
                 setLoading(false);
             } catch (error) {
+
                 setError(error);
-                setLoading(false);
+
             }
         };
 
         getItem();
     }, [site, url]);
+    useEffect(() => {
+        if (error) {
+            navigate(-1);
+        }
+    }, [error, navigate]);
 
     const formatDate = (timestamp) => {
         const date = new Date(timestamp);

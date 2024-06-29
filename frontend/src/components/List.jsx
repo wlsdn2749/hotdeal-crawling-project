@@ -212,6 +212,8 @@ const List = () => {
                 <div className="no-matches">{error.message}</div>
             ) : error ? (
                 <div>Error: {error.message}</div>
+
+
             ) : (
                 <div className="wrapper">
                     {items.map((item, index) => (

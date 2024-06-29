@@ -35,6 +35,11 @@ export const detailItem = async (site, url) => {
             item: response.data,
         };
     } catch (error) {
+        if (error.response && error.response.status === 404) {
+            // 404 에러가 발생하면 새로운 창을 열어 매개변수 url 경로로 이동시킴
+            window.open(url, '_blank');
+            return; // 추가적인 처리가 없도록 리턴
+        }
         console.error('Error fetching item:', error);
         throw error;
     }
