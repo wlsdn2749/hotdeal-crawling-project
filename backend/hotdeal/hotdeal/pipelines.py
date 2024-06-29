@@ -80,7 +80,7 @@ class HotdealPipeline:
             item['views'] = item['views'].strip()
             item['author'] = item['author'].strip()
             item['price'] = "가격 미제공"
-            item['deliveryfee'] = "배송료 미제공"
+            item['deliveryfee'] = "배송비 미제공"
             
             match = re.search(r'\[(.*?)\]', item['title'])
             if match:
@@ -95,6 +95,7 @@ class HotdealPipeline:
         # author 필드 처리
         item['author'] = re.sub(r'[\s/]', '', item['author'])
 
+        item['deliveryfee'] = DataUtils.remove_keywords(item['deliveryfee'], "배송비", "배달료", "배송료")
         return item
 
 class HotdealDetailPipeline:

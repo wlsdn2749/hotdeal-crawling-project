@@ -110,6 +110,18 @@ class DataUtils:
         
             
         return content.replace("[", "").replace("]", "")
+
+    @staticmethod
+    def remove_keywords(content, first_keyword, *additional_keywords):
+        if not isinstance(content, str) or first_keyword is None:
+            return "미제공"
+        
+        keywords = (first_keyword,) + additional_keywords
+        
+        for keyword in keywords:
+            content = content.replace(keyword, "")
+        
+        return content.strip()
         
 class QzUtils:
     
