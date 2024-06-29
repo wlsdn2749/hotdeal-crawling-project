@@ -204,20 +204,6 @@ const List = () => {
                         />
                     </div>
                 </div>
-
-                <form className="d-flex" onSubmit={handleSearchSubmit}>
-                    <div className="react-select-container search-mode-dropdown">
-                        <Select
-                            options={searchModeOptions}
-                            value={searchMode}
-                            onChange={handleSearchModeChange}
-                            placeholder="검색 모드 선택"
-                            closeMenuOnSelect={true}
-                        />
-                    </div>
-                    <input className="form-control me-2" type="search" placeholder="Search" aria-label="Search" value={searchQuery} onChange={handleSearchChange} /> {/* 검색어 입력 */}
-                    <button className="btn btn-outline-success" type="submit">검색</button> {/* 검색 버튼 */}
-                </form>
             </div>
 
             {loading ? (
@@ -259,6 +245,23 @@ const List = () => {
                     forcePage={page - 1} // 현재 페이지를 반영하기 위해 forcePage 사용
                 />
             )}
+
+            <div className='searchForm'>
+                <form className="d-flex" onSubmit={handleSearchSubmit}>
+                    <div className="react-select-container search-mode-dropdown">
+                        <Select
+                            options={searchModeOptions}
+                            value={searchMode}
+                            onChange={handleSearchModeChange}
+                            placeholder="검색 모드 선택"
+                            closeMenuOnSelect={true}
+                        />
+                    </div>
+                    <input className="form-control me-2" type="search" placeholder="Search" aria-label="Search" value={searchQuery} onChange={handleSearchChange} /> {/* 검색어 입력 */}
+                    <button className="btn btn-outline-success" type="submit">검색</button> {/* 검색 버튼 */}
+                </form>
+            </div>
+
         </div>
     );
 };
