@@ -56,7 +56,7 @@ const List = () => {
     const [selectedSites, setSelectedSites] = useState([]);
     const [order, setOrder] = useState(orderOptions[0]); // 기본 정렬을 최신순으로 설정
     const [searchQuery, setSearchQuery] = useState(''); // 검색어 상태 변수
-    const [searchMode, setSearchMode] = useState(searchModeOptions[0]); // 검색 모드 상태 변수
+    const [searchMode, setSearchMode] = useState(searchModeOptions[1]); // 검색 모드 상태 변수
     const [itemsPerPage, setItemsPerPage] = useState(() => {
         // localStorage에서 itemsPerPage 값을 불러오거나 기본값으로 10을 사용
         const saved = localStorage.getItem('itemsPerPage');
