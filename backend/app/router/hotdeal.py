@@ -82,13 +82,6 @@ class SearchParameters(BaseModel):
                     detail=f"Invalid search mode, Valid search mode are : 'title', 'content'" 
                 )
                 
-        if info.field_name == 'search_query':
-            if len(v) < 2:
-                raise HTTPException(
-                    status_code=400,
-                    detail=f"검색어는 2자 이상 이어야 합니다."
-                )
-                
         if info.field_name == 'order':
             if v not in ['asc', 'desc']:
                 raise HTTPException(
@@ -143,8 +136,9 @@ async def read_items(response: Response, itemlist: ItemList = Depends()):
     
     result = conn.execute(query, query_parameters).fetchall()
 
-    if not result:
+    if not result:  
         raise HTTPException(status_code=400, detail="결과가 없습니다.")
+    
     items: List[Item] = [Item(**dict(zip(columns,item))) for item in result]
     
     response.headers["X-Total-Count"] = str(conn.execute(page_query, query_parameters).fetchone()[0])
