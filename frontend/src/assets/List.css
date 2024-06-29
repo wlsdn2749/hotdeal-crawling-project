@@ -45,6 +45,7 @@
 .List .wrapper {
     display: flex;
     flex-direction: column;
+    cursor: pointer;
     gap: 20px;
 }
 
