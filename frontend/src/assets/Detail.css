@@ -140,3 +140,8 @@ body {
     color: red;
     padding: 50px;
 }
+
+/* Detail.css 파일에 추가 */
+.detail-table a {
+    word-break: break-all;
+}
