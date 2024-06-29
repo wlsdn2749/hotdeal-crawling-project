@@ -7,7 +7,7 @@ const API_URL = 'http://tools.gyu.be:8000/hotdeal';
 // 아이템 목록을 가져오는 함수
 export const fetchItems = async (page = 1, limit = 20, order = 'desc') => {
     try {
-        const response = await axios.get(API_URL, {
+        const response = await axios.get(`${API_URL}/`, {
             params: { page, count: limit, order }
         });
         // 응답 헤더에서 총 개수 가져오기

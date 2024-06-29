@@ -50,7 +50,12 @@ const List = () => {
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [page, setPage] = useState(1);
+    const [page, setPage] = useState(() => {
+        const params = new URLSearchParams(window.location.search);
+        const pageParam = params.get('page');
+        const currentPage = pageParam ? Number(pageParam) : 1;
+        return currentPage;
+    });
     const [pageCount, setPageCount] = useState(0);
     const [selectedCategories, setSelectedCategories] = useState([]);
     const [selectedSites, setSelectedSites] = useState([]);
@@ -69,7 +74,10 @@ const List = () => {
         const params = new URLSearchParams(location.search);
         const pageParam = params.get('page');
         const currentPage = pageParam ? Number(pageParam) : 1;
-        setPage(currentPage);
+        if (page !== currentPage) {
+            setPage(currentPage);
+        }
+
     }, [location.search]);
 
     useEffect(() => {
@@ -89,7 +97,6 @@ const List = () => {
                 setPageCount(Math.ceil(total / itemsPerPage));
                 setError(null); // 에러 초기화
             } catch (error) {
-
                 setError(error);
             } finally {
                 setLoading(false);
