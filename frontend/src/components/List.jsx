@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Select from 'react-select';
-import { fetchItems, fetchItemsByCategories, searchItems } from '../api/Api';
+import { fetchItemsByCategories, searchItems } from '../api/Api';
 import '../assets/List.css';
 import HotDealItem from './HotDealItem';
 import ReactPaginate from 'react-paginate';
@@ -76,21 +76,29 @@ const List = () => {
         const getItems = async () => {
             setLoading(true);
             try {
-                const result = await fetchItemsByCategories(page, itemsPerPage, selectedCategories.map(c => c.value), order.value, selectedSites.map(s => s.value));
+                const result = await fetchItemsByCategories(
+                    page,
+                    itemsPerPage,
+                    selectedCategories.map(c => c.value),
+                    order.value,
+                    selectedSites.map(s => s.value)
+                );
                 const { items, total } = result;
                 console.log('서버에서 받아온 items', items);
                 setItems(Array.isArray(items) ? items : []);
                 setPageCount(Math.ceil(total / itemsPerPage));
                 setError(null); // 에러 초기화
-                setLoading(false);
             } catch (error) {
+
                 setError(error);
+            } finally {
                 setLoading(false);
             }
         };
 
         getItems();
-    }, [page, itemsPerPage, selectedCategories, selectedSites, order]);
+        // 의존성 배열에 필요한 값들만 포함
+    }, [page, itemsPerPage, selectedCategories, order, selectedSites]);
 
     useEffect(() => {
         // itemsPerPage 값이 변경될 때 localStorage에 저장

@@ -46,8 +46,10 @@ export const detailItem = async (site, url) => {
 };
 
 // 카테고리 및 정렬 방식으로 필터링된 아이템을 가져오는 함수
-export const fetchItemsByCategories = async (page = 1, limit = 10, categories = [], order = 'desc', sites = []) => {
+export const fetchItemsByCategories = async (page = 1, limit = 20, categories = [], order = 'desc', sites = []) => {
+
     if (categories.length === 0 && sites.length === 0) {
+        console.log("test1")
         return await fetchItems(page, limit, order);
     }
 
@@ -64,11 +66,13 @@ export const fetchItemsByCategories = async (page = 1, limit = 10, categories = 
         });
         // 응답 헤더에서 총 개수 가져오기
         const totalCount = response.headers['x-total-count'];
+        console.log("test2")
         return {
             items: response.data,
             total: totalCount ? parseInt(totalCount, 10) : 200,  // 총 아이템 수를 헤더에서 가져오거나 기본값 200으로 설정
         };
     } catch (error) {
+        console.log("test3")
         console.error('Error fetching items by categories:', error);
         throw error;
     }
