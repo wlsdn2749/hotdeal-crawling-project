@@ -163,10 +163,12 @@ const List = () => {
             setLoading(false);
         } catch (error) {
             if (error.response && error.response.status === 400) {
+                // alert("검색어를 2자리 이상 입력해주세요.");
                 setItems([]); // items를 빈 배열로 설정
                 setPageCount(0); // 페이지 수를 0으로 설정
                 setError({ message: '일치하는 항목이 없습니다.' });
             } else {
+
                 setError(error);
             }
             setLoading(false);
@@ -231,9 +233,14 @@ const List = () => {
 
             ) : (
                 <div className="wrapper">
-                    {items.map((item, index) => (
-                        <HotDealItem key={index} item={item} onClick={() => handleItemClick(item)} />
-                    ))}
+
+                    {items.length > 0 ? (
+                        items.map((item, index) => (
+                            <HotDealItem key={index} item={item} onClick={() => handleItemClick(item)} />
+                        ))
+                    ) : (
+                        <p>일치하는 항목이 없습니다</p>
+                    )}
                 </div>
             )}
 
