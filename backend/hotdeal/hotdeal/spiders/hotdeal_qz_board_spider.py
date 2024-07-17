@@ -97,6 +97,6 @@ class QzBoardSpider(scrapy.Spider):
             "product_name": "lazy", # TODO strip(), remove '/' 
             "price": table.xpath("./tr[3]//span/text()[last()]").get(),            
             "deliveryfee": table.xpath("./tr[4]/td/text()").get(),
-            "article": response.xpath(".//textarea[contains(@id, 'org_contents')]/p/text()").getall(), 
+            "article": response.xpath(".//textarea[contains(@id, 'org_contents')]//text()").getall(), 
             "comments": comments_lst # JS로 댓글을 Load함으로 지금 현재 미구현
         }
